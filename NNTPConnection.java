@@ -11,7 +11,10 @@ public class NNTPConnection extends InputStream {
 	
 	private static final int BUFFER_SIZE=8192;
 	private  String endMarkerString;
+	
 	transient private boolean lock=false;
+	
+	// For BPS calculation.
 	transient private int total = 0;
 	transient private long start;
 	transient private long split;
@@ -25,7 +28,6 @@ public class NNTPConnection extends InputStream {
 	private int buffer2_size=0;
 	private byte[] buffer2;
 	
-	
 	String groupName;
 	Integer groupStart;
 	Integer groupEnd;
@@ -34,10 +36,14 @@ public class NNTPConnection extends InputStream {
 	HashMap<String, String> articleHeader;
 	
 	private String articleName;
-	private String article;
+	
+	private String articleBuffer;
 	private int articleMarker=0;
 	private int articlePointer=0;
 	
+	/** 
+	 * Class constructor.
+	 */
 	public NNTPConnection () {
 		//	endMarkerString = new String (endmarker);
 		//printHex(endMarkerString);
@@ -49,27 +55,92 @@ public class NNTPConnection extends InputStream {
 		
 	}
 	
-	public NNTPConnection(String s, int i) throws UnknownHostException, IOException {		
+	/** 
+	 * Class constructor, specifying host address and port
+	 *
+	 * @param hostname  the hostname
+	 * @param port  the port number
+	 */
+	public NNTPConnection(String hostname, int port) throws UnknownHostException, IOException {		
 		this();
-		network = new TCPConnection(s,i);
+		network = new TCPConnection(hostname,port);
 	}
 	
+	/** 
+	 * Class constructor, specifying host address. Uses default NNTP port
+	 *
+	 * @param hostname  the hostname
+	 */
+	public NNTPConnection(String hostname) throws UnknownHostException, IOException {		
+		this(hostname,119);
+	}
+	
+	
+	/** 
+	 * Enables printing of network messages
+	 */
 	public void enableDebug() { network.enableDebug(); }
+	
+	/** 
+	 * Disables printing of network messages
+	 */
 	public void disableDebug() { network.disableDebug(); }
 	
+	/** 
+	 * Returns the NNTP hostname
+	 *
+	 * @return the hostname
+	 */
+	
 	public String getHost() { return network.getHost(); }
+	
+	/** 
+	 * Returns the NNTP port
+	 *
+	 * @return the port
+	 */
+	
 	public int getPort() { return network.getPort(); }
 	
-	public void setHost(String s) { network.setHost(s); }
+	/** 
+	 * set the NNTP server hostname to connect to
+	 *
+	 * @param hostname  the hostname
+	 */
+	public void setHost(String hostname) { network.setHost(hostname); }
 	
-	public void setPort(int i)  { network.setPort(i); }
+	/** 
+	 * set the NNTP server port number
+	 *
+	 * @param port  the port number
+	 */
+	public void setPort(int port)  { network.setPort(port); }
 	
+	/** 
+	 * set the lock semaphore.  This does nothing functional, is used for multi threaded applications that want to flag that this connection is busy.
+	 */
 	public void lock() { lock = true; }
+	/** 
+	 * unlock the lock semaphore.  This does nothing functional, is used for multi threaded applications that want to flag that this connection is busy.
+	 */	
 	public void unlock() { lock = false; }
+	
+	/** 
+	 * get the lock semaphore.  Is used for multi threaded applications that want to flag that this connection is busy.
+	 *
+	 * @return if the lock flag is set
+	 */
 	public boolean isLocked() { return lock; }
 	
 	//	public BufferedOutputStream getOutputStream() {return network.getOutputStream();}
 	//	public BufferedInputStream getInputStream() {return network.getInputStream();}
+	
+	/** 
+	 * Initiates the connection to the NNTP server.
+	 *
+	 * @exception IOException  If the server is uncontactable or a network error occurs
+	 * @exception NNTPConnectionResponseException  if the server is contactable but returns a non successful response.
+	 */
 	
 	public void connect() throws IOException, NNTPConnectionResponseException {
 		
@@ -85,6 +156,14 @@ public class NNTPConnection extends InputStream {
 		
 	}
 	
+	/** 
+	 * terminates the connection to the NNTP server.
+	 *
+	 * @exception IOException  If a network error occurs
+	 * @exception NNTPConnectionResponseException  if the server returns a non successful response. 
+	 */
+	
+	
 	public void disconnect() throws IOException, NNTPUnexpectedResponseException {
 		
 		this.setEndCommand(newline);
@@ -96,30 +175,88 @@ public class NNTPConnection extends InputStream {
 		network.disconnect();
 	}
 	
-	public void reset() { buffer_size = 0; buffer_pointer = 0; buffer2_size = 0; end_of_data=false; }
+	/** 
+	 * this resets the InputStreamPointer to the position set by mark.
+	 *
+	 * @see java.io.InputStream#reset
+	 * @see #mark(int)
+	 */
+	public void reset() { 
+		articlePointer = articleMarker;
+	}
 	
-	public void sendCommand (String comm) throws IOException { reset(); network.sendCommand(comm); }
-	public void sendCommand (byte[] comm) throws IOException { reset(); network.sendCommand(comm); }
 	
-	public boolean markSupported() { return false; }
+	/** 
+	 * this resets the internal read buffer to the start.
+	 */
 	
-	public int available() { return buffer_size - buffer_pointer; }
+	private void internal_reset() {
+		buffer_size = 0; buffer_pointer = 0; buffer2_size = 0; end_of_data=false; 
+	}
 	
+	/** 
+	 * Sends raw data to the NNTP server.
+	 *
+	 * @param comm the String to send to the server
+	 * @exception IOException if a network error occurs
+	 */
+	
+	public void sendCommand (String comm) throws IOException { internal_reset(); network.sendCommand(comm); }
+	/** 
+	 * Sends raw data to the NNTP server.
+	 *
+	 * @param comm the byte array to send to the server
+	 * @exception IOException if a network error occurs
+	 */
+	public void sendCommand (byte[] comm) throws IOException { internal_reset(); network.sendCommand(comm); }
+	
+	/** 
+	 * returns if the Stream is seekable.
+	 *
+	 * @see java.io.InputStream#markSupported
+	 */
+	
+	public boolean markSupported() { return true; }
+	/** 
+	 * returns the number of bytes remaining before a blocking operation is required.
+	 *
+	 * @see java.io.InputStream#available
+	 */
+	
+	public int available() { return articleBuffer.length() - articlePointer; }
+	
+	/** 
+	 * returns data read from the NNTP server as a string. Until the terminating marker.
+	 *
+	 * @return a String containing the server response
+	 * @exception IOException if a network error occurs
+	 * @see #setEndCommand(byte[])
+	 */
 	public String readAsString() throws IOException {
 		String s = new String();
 		int i=0;
 		
 		byte[] b = new byte[1];
-		i = this.read();
+		i = this.internal_read();
 		
 		while (i != -1) {
 			b[0] = (byte)i;
 			s = s.concat(new String(b));
-			i = this.read();
+			i = this.internal_read();
 		}
 		return s;
 		
 	}
+	
+	
+	/** 
+	 * returns data read from the NNTP server as a string. Until the end of line character or terminating marker, 
+	 * which ever is first.
+	 *
+	 * @return a String containing the server response
+	 * @exception IOException if a network error occurs
+	 */
+	
 	
 	public String readLine () throws IOException {
 		
@@ -130,7 +267,7 @@ public class NNTPConnection extends InputStream {
 		String s = new String();
 
 		while (s.indexOf("\r\n") == -1 && i != -1) {
-			i = this.read();
+			i = this.internal_read();
 			if (i != -1) {
 				b[0] = (byte)i;
 				s = s.concat(new String(b));
@@ -146,7 +283,47 @@ public class NNTPConnection extends InputStream {
 	
 	// TODO: read entire article into string buffer and read from that.
 	
-	public int read () throws IOException {
+	/** 
+	 * Marks the current position in the Input Stream.
+	 * Normally the readlimit arguments tells this input stream to allow that many bytes to be read before the mark position gets invalidated.
+	 * However as this uses a buffer readlimit is ignored and is treated as infinite.
+	 *
+	 * @param readlimit unused and is treated as infinite.
+	 */
+	
+	public void mark(int readlimit)
+	{
+		articleMarker = articlePointer;
+	}
+	
+	/** 
+	 * returns a single byte of data read from the NNTP server as an integer. Until the terminating marker.
+	 * this method uses a buffer which is populated by the {@link getArticle(String)} or {@link bodyArticle(String)} commands.
+	 * it should support seeking operations.
+	 *
+	 * @return a byte of data or -1 if the terminating marker is seen.
+	 * @exception IOException if a network error occurs
+	 * @see #setEndCommand(byte[])
+	 * @see java.io.InputStream#read
+	 */
+	
+	
+	public int read() throws IOException {
+		return articleBuffer.charAt(articlePointer++);
+	}
+	
+	/** 
+	 * returns a single byte of data read from the NNTP server as an integer. Until the terminating marker.
+	 * This method reads directly from the network connection and does not cache any data.
+	 * Seeking operations using the read method are not supported.
+	 *
+	 * @return a byte of data or -1 if the terminating marker is seen.
+	 * @exception IOException if a network error occurs
+	 * @see #setEndCommand(byte[])
+	 * @see java.io.InputStream#read
+	 */
+	
+	private int internal_read() throws IOException {
 		
 		if (buffer_pointer >= buffer_size) {
 			if (!end_of_data) {
@@ -205,13 +382,52 @@ public class NNTPConnection extends InputStream {
 		return (int) buffer[buffer_pointer++];
 	}
 	
+	/** 
+	 * Closes the current operation's InputStream.
+	 * This does not disconnect from the NNTP server.  It simply closes this InputStream for reading from the server.
+	 *
+	 * @exception IOException if a network error occurs
+	 * @see java.io.InputStream#close
+	 */
 	public void close () throws IOException
 	{
-		while (this.read() != -1);
-		this.reset();
+		articlePointer = 0;
+		articleMarker = 0;
+	//	while (this.internal_read() != -1);
+	//	this.reset();
 	}
 	
-	private String checkResponse (String result) throws IOException, NNTPUnexpectedResponseException {
+	/** 
+	 * skips over n bytes of data from the current operation's InputStream.
+	 
+	 */
+	public long skip (long n)
+	{
+	
+		long oldPointer = articlePointer;
+		
+		articlePointer += n;
+		
+		if (articlePointer >= articleBuffer.length()) 
+			articlePointer = articleBuffer.length() -1;
+		
+		return articlePointer - oldPointer;
+	}
+	
+	
+	/** 
+	 * Checks that the response from the NNTP server matches the expected result.
+	 * throws an NNTPUnexpectedResponseException if the response does not match.
+	 
+	 * @param result  the expected result String.
+	 * @return the server response String.
+	 * @exception IOException if a network error occurs
+	 * @exception NNTPUnexpectedResponseException if the response does not match the result string.  
+	 *            This is usually caught by a supporting method and a more specific Exception is thrown.
+	 */
+	
+	
+	protected String checkResponse (String result) throws IOException, NNTPUnexpectedResponseException {
 		String s = this.readLine();
 		
 		if (!s.startsWith(result)) {
@@ -220,43 +436,118 @@ public class NNTPConnection extends InputStream {
 		return s;
 	}
 	
-	public boolean NNTPendofcommand(byte[] comm, int l) {
+	/**
+	 * Checks the data buffer for the end of data marker.
+	 *
+	 * @param comm  the byte array buffer of the NNTP server response.
+	 * @param l  the length of the byte array.
+	 * @return if the end of data marker is seen.
+	 */
+	
+	private boolean NNTPendofcommand(byte[] comm, int l) {
 		if (l > 0) 
 		return NNTPendofcommand ( new String (comm,0,l));
 		return false;
 	}
 	
-	public boolean NNTPendofcommand (byte[] comm, int l,byte[] comm2, int l2) {
+	
+	/**
+	 * Checks the data buffer for the end of data marker.
+	 * This method allows for the marker to appear on the boundary of two buffers.
+	 * First and second buffers are in order they have been read from the NNTP server.
+	 *
+	 * @param comm  the first byte array buffer of the NNTP server response.
+	 * @param l  the length of the first byte array.
+	 * @param comm2  the second byte array buffer of the NNTP server response.
+	 * @param l2  the length of the second byte array.
+	 * @return if the end of data marker is seen.
+	 */
+	
+	
+	private boolean NNTPendofcommand (byte[] comm, int l,byte[] comm2, int l2) {
 		return NNTPendofcommand ( new String (comm,0,l) , new String (comm2,0,l2));
 	}
 	
-	public boolean NNTPendofcommand (String s1, String s2)
+	/**
+	 * Checks the data buffer for the end of data marker.
+	 * This method allows for the marker to appear on the boundary of two buffers.
+	 * First and second buffers are in order they have been read from the NNTP server.
+	 *
+	 * @param comm  the first String buffer of the NNTP server response.
+	 * @param comm2  the second String buffer of the NNTP server response.
+	 * @return if the end of data marker is seen.
+	 */
+	
+	private boolean NNTPendofcommand (String comm1, String comm2)
 	{
 		
-		if (s1 != null) {
-			if (s2 != null) {
-				return NNTPendofcommand(s1.concat(s2));
+		if (comm1 != null) {
+			if (comm2 != null) {
+				return NNTPendofcommand(comm1.concat(comm2));
 			} else {
-				return NNTPendofcommand(s1);
+				return NNTPendofcommand(comm1);
 			}
 		} else {
-			if (s2 != null) {
-				return NNTPendofcommand(s2);
+			if (comm2 != null) {
+				return NNTPendofcommand(comm2);
 			} 
 		}
 		return false;
 	}
 	
-	public boolean NNTPendofcommand (String contents) {
-		return contents.indexOf(endMarkerString) != -1;
+	/**
+	 * Checks the data buffer for the end of data marker.
+	 *
+	 * @param comm  the String buffer of the NNTP server response.
+	 * @return if the end of data marker is seen.
+	 */
+	
+	/**
+	 * Checks the data buffer for the end of data marker.
+	 *
+	 * @param comm  the byte array buffer of the NNTP server response.
+	 * @return if the end of data marker is seen.
+	 */
+	
+	private boolean NNTPendofcommand (String comm) {
+		return comm.indexOf(endMarkerString) != -1;
 	}
+	
+	/**
+	 * Sets the end of data marker.  This is used to signify the end of data from the current NNTP command.
+	 * Some commands end with a newline and some end with a single . on a line.
+	 *
+	 * @param comm  the byte array buffer of the end of data marker.
+	 */
 	
 	private void setEndCommand(byte[] b) 
 	{
 		endMarkerString = new String (b);
 	}
 	
-	public static void printHex (byte[]b , int s) 
+	private void setEndCommandNewline() { endMarkerString = new String (newline); }
+	private void setEndCommandDot() { endMarkerString = new String (dot); }
+
+	
+	/**
+	 * Prints a hex dump of a String to System.out.  Used for debugging.
+	 *
+	 * @param s  the String to be dumped as hex.
+	 */
+	
+	protected static void printHex (String s) 
+	{
+		printHex(s.getBytes(),s.length());
+	}
+	
+	/**
+	 * Prints a hex dump of a byte array. Used for debugging.
+	 *
+	 * @param b  the byte array to be dumped as hex.
+	 * @param s  the length of the byte array.
+	 */
+	
+	protected static void printHex (byte[]b , int s) 
 	{
 		int width  = 16;
 		
@@ -287,12 +578,25 @@ public class NNTPConnection extends InputStream {
 		}
 	}
 	
+	/**
+	 * Returns the bytes per second of the data since the transfer began.
+	 *
+	 * @return the bytes per second.
+	 */
+	
 	public long getAveBPS() {
 		long sec = System.currentTimeMillis() - start;
 		if (sec>0)
 			return 1000*total / sec; 
 		return 0;
 	}
+	
+	/**
+	 * Returns the bytes per second of the data since the transfer began or the last call to this method.
+	 * whichever was sooner.
+	 *
+	 * @return the bytes per second.
+	 */
 	
 	public long getSplitBPS() {
 		long sec = System.currentTimeMillis() - split;
@@ -304,11 +608,28 @@ public class NNTPConnection extends InputStream {
 		return 0;
 	}
 	
+	/**
+	 * Returns the number of  bytes read since the transfer began.
+	 *
+	 * @return the number of bytes.
+	 */
+	
 	public int getTotal() { return total; }
+	
+	
+	/**
+	 * Changes the News Server group and parses the response from the server.
+	 *
+	 * @param g the name of the group. 
+	 * @exception IOException if a network error occurs.
+	 * @exception NNTPNoSuchGroupException if the group does not exist.
+	 * @exception NNTPGroupResponseException if the server returns an invalid group command response.
+	 */
+	
 	
 	public void setGroup (String g) throws IOException, NNTPNoSuchGroupException, NNTPGroupResponseException
 	{
-		setEndCommand(newline);
+		setEndCommandNewline();
 		sendCommand("GROUP " + g + "\r\n");
 		
 		try {
@@ -333,24 +654,62 @@ public class NNTPConnection extends InputStream {
 		
 	}
 	
+	/**
+	 * returns the number of articles in the current group.
+	 *
+	 * @return the number of articles in the current group.
+	 * @see #setGroup(String)
+	 */
+	
 	public Integer getGroupLength() {return groupLength;}
+	/**
+	 * returns the number of the first article in the current group.
+	 *
+	 * @return the number of the first article in the current group.
+	 * @see #setGroup(String)
+	 */
+	
 	public Integer getGroupStart() {return groupStart;}
+	/**
+	 * returns the number of the last article in the current group.
+	 *
+	 * @return the number of the last article in the current group.
+	 * @see #setGroup(String)
+	 */
+	
 	public Integer getGroupEnd() {return groupEnd;}
+	/**
+	 * returns the name of the current group.
+	 *
+	 * @return the name of the current group.
+	 * @see #setGroup(String)
+	 */
+	
 	public String getGroupName() {return groupName;}
+	
+	/**
+	 * sends the STAT command to the news server and sets the current article to the response.
+	 *
+	 * @param articleNumber the number of the article.  Will also accept article name but this would be a redundant command.
+	 * @return the name of the article.
+	 * @exception IOException if a network error occurs
+	 * @exception NNTPNoSuchArticleException if the article cannot be found or if there is no current group.
+	 */
+	
 	
 	public String statArticle (String articleNumber) throws IOException, NNTPNoSuchArticleException
 	{
 		String s;
 		
 		// System.out.println("STAT " + articleNumber );
-		setEndCommand(newline);
+		setEndCommandNewline();
 		sendCommand("STAT " + articleNumber + "\r\n");
 		try {
 			s = checkResponse("223");
 		} catch (NNTPUnexpectedResponseException e) {
 			throw new NNTPNoSuchArticleException(e.getMessage());
 		}
-		s = s.replaceAll("(\\r|\\n)", "");
+		s = s.replaceAll("(\\r|\\n)", ""); // is this needed anymore. readLine should strip end of line characters
 		String param[] = s.split(" ");
 		
 		if (param.length > 2) {
@@ -361,10 +720,16 @@ public class NNTPConnection extends InputStream {
 		throw new IOException("NNTP Error stat response: " + s);	
 		
 	}
+		
+	/**
+	 * sends the HEAD command to the news server and sets the current article to the response.
+	 * stores the information about the current article.
+	 *
+	 * @param article the name of the article.
+	 * @exception IOException if a network error occurs
+	 * @exception NNTPNoSuchArticleException if the article cannot be found or if a articleNumber is used and there is no current group.
+	 */
 	
-	public void headArticle() throws IOException,NNTPNoSuchArticleException {
-		headArticle(this.articleName);
-	}
 	
 	public void headArticle(String article) throws IOException,NNTPNoSuchArticleException {
 		
@@ -372,7 +737,7 @@ public class NNTPConnection extends InputStream {
 		String r ;
 		String q=null;
 		
-		setEndCommand(dot);
+		setEndCommandDot();
 		sendCommand("HEAD " + article + "\r\n");
 		
 		try {
@@ -394,6 +759,14 @@ public class NNTPConnection extends InputStream {
 		this.articleName = articleHeader.get("Message-ID");
 	}
 	
+	/**
+	 * splits the input string on the first colon seen.
+	 *
+	 * @param s the string to split
+	 * @return a String array containing the key and value.
+	 */
+	
+	
 	private String[] splitHeader(String s)
 	{
 		int colon = s.indexOf(": ");
@@ -406,16 +779,50 @@ public class NNTPConnection extends InputStream {
 		return r;
 	}
 	
+	/**
+	 * returns the name of the current article in the form: <article-id@server>
+	 *
+	 * @return the name of the current article.
+	 */
+	
 	public String getArticleName() { return this.articleName; }
+	
+	/**
+	 * returns the subject of the current article 
+	 *
+	 * @return the subject of the current article.
+	 */
+	
 	public String getArticleSubject() { return this.articleHeader.get("Subject"); }
 	
+	
+	/**
+	 * sets the current article 
+	 *
+	 * @deprecated use {@link #statArticle(String)}, {@link #headArticle(String)}, {@link #getArticle(String)}, {@link #bodyArticle(String)}
+	 * @param articleName the name of the article
+	 */
+	
 	public void setArticleName (String articleName) throws IOException , NNTPNoSuchArticleException { 
+		getArticle(articleName);
+	}
 		
+	
+	/**
+	 * Sends the ARTICLE command to the News server and allows reading by the IOStream calls. 
+	 *
+	 * @param articleName the name of the article
+	 * @exception NNTPNoSuchArticleException if the article cannot be found or if a articleNumber is used and there is no current group.
+	 * @exception IOException if a network error occurs
+	 */
+	
+	public void getArticle (String articleName) throws IOException , NNTPNoSuchArticleException { 
+
 		this.close();
 		
 		this.articleName = articleName; 
 		
-		setEndCommand(dot);
+		setEndCommandDot();
 		sendCommand("ARTICLE " + articleName + "\r\n");
 		try {
 			checkResponse("220");
@@ -426,19 +833,64 @@ public class NNTPConnection extends InputStream {
 		start = System.currentTimeMillis();
 		split = start;
 		
-		
+		articleBuffer = this.readAsString();
+
 	}
 	
-	public String getArticleAsString() throws IOException,NNTPNoSuchArticleException {
+	/**
+	 * Sends the BODY command to the News server and allows reading by the IOStream calls. 
+	 *
+	 * @param articleName the name of the article
+	 * @exception NNTPNoSuchArticleException if the article cannot be found or if a articleNumber is used and there is no current group.
+	 * @exception IOException if a network error occurs
+	 */
+	
+	public void bodyArticle (String articleName) throws IOException , NNTPNoSuchArticleException { 
+		
+		
+		this.close();
+		
+		this.articleName = articleName; 
+		
+		setEndCommandDot();
+		sendCommand("BODY " + articleName + "\r\n");
+		try {
+			checkResponse("222");
+		} catch (NNTPUnexpectedResponseException e) {
+			throw new NNTPNoSuchArticleException(e.getMessage());
+		}
+		
+		start = System.currentTimeMillis();
+		split = start;
+		
+		articleBuffer = this.readAsString();
+	}
+	
+	
+	/**
+	 * reads the current article as a String
+	 *
+	 * @deprecated use {@link #readAsString()}
+	 * @exception IOException if a network error occurs
+	 */
+	
+	public String getArticleAsString() throws IOException {
 		return this.readAsString();
 	}
 	
 	
-	public int writeArticleToFile(File f) throws IOException,NNTPNoSuchArticleException {
+	/**
+	 * reads the current article into a File.
+	 *
+	 * @param f the File to be written to.
+	 * @exception IOException if a network error or Disk error occurs
+	 */
+	
+	public int writeArticleToFile(File f) throws IOException {
 		
 		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
 		
-		String a = getArticleAsString();
+		String a = readAsString();
 		
 		out.write (a.getBytes(),0,a.length());
 		out.close();

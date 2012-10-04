@@ -63,9 +63,17 @@ public class NzbCollectorThread implements Runnable {
 						Date d = new Date (remain.longValue() + currenttime);
 						System.out.println(subject + " : " + d.toString() + " : " +  nntp.getArticleName() );
 						
+						Thread decodeThread = new Thread (new Runnable() {
+								public void run() 
+								{
+									NNTPyDecoder ydec = new NNTPyDecoder(nntp.getArticleName());
+									ydec.decodeParts();
+								}
+						});
+						decodeThread.start();
 						
-						NNTPyDecoder ydec = new NNTPyDecoder(nntp.getArticleName());
-						ydec.decodeParts();
+					//	NNTPyDecoder ydec = new NNTPyDecoder(nntp.getArticleName());
+					//	ydec.decodeParts();
 
 						starttime =currenttime;
 						startarticle = currentarticle;

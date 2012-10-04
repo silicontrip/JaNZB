@@ -467,7 +467,13 @@ public class NNTPConnection extends InputStream {
 	
 	
 	private boolean NNTPendofcommand (byte[] comm, int l,byte[] comm2, int l2) {
-		return NNTPendofcommand ( new String (comm,0,l) , new String (comm2,0,l2));
+		if (l>0 && l2 >0) 
+			return NNTPendofcommand ( new String (comm,0,l) , new String (comm2,0,l2));
+		if (l>0)
+			return NNTPendofcommand ( new String (comm,0,l));
+		if (l2>0)
+			return NNTPendofcommand ( new String (comm2,0,2));
+		return false;
 	}
 	
 	/**

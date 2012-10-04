@@ -131,6 +131,13 @@ public class NNTPyDecoder {
 			// nntp.setArticleName(parts[i].file);
 			parts[i].nntp.reset();
 			decoder.setInputStream(parts[i].nntp);
+			if (out == null) {
+				out = new BufferedOutputStream(
+											   new FileOutputStream(
+																	decoder.getFileName()));
+				decoder.setOutputStream(out);
+			}
+			
 			System.out.print("decoding file \"" +
 							 decoder.getFileName() +
 							 "\" [" + decoder.getSize() + " bytes]");
@@ -139,14 +146,12 @@ public class NNTPyDecoder {
 								 decoder.getPartNumber() + "/" +
 								 decoder.getTotalParts() + ")");
 			System.out.println();
-			if (out == null) {
-				out = new BufferedOutputStream(
-											   new FileOutputStream(
-																	decoder.getFileName()));
-				decoder.setOutputStream(out);
-			}
+			
+			
 			decoder.decode();
 		
+			System.out.println("Done.");
+			
 			parts[i].nntp.disconnect();
 			
 		}

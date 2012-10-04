@@ -1,6 +1,8 @@
-import java.io.IOException;
+import java.io.*;
+
 import java.util.HashMap;
 import java.util.Date;
+import ar.com.ktulu.yenc.*;
 
 
 public class NzbCollectorThread implements Runnable {
@@ -51,7 +53,7 @@ public class NzbCollectorThread implements Runnable {
 					
 					String subject = nntp.getArticleSubject();
 					
-				//	System.out.println ("Subject: " + subject + "match: " + match);
+					//	System.out.println ("Subject: " + subject + "match: " + match);
 					
 					if (subject.matches(match)) {
 						long currenttime = System.currentTimeMillis();
@@ -63,18 +65,41 @@ public class NzbCollectorThread implements Runnable {
 						Date d = new Date (remain.longValue() + currenttime);
 						System.out.println(subject + " : " + d.toString() + " : " +  nntp.getArticleName() );
 						
-						Thread decodeThread = new Thread (new Runnable() {
-								public void run() 
-								{
-									NNTPyDecoder ydec = new NNTPyDecoder(nntp.getArticleName());
-									ydec.decodeParts();
-								}
-						});
-						decodeThread.start();
+					//	Thread decodeThread = new Thread (new Runnable() {
+					//		public void run() 
+					//		{
+						/*
+								try {
+									// NNTPyDecoder ydec = new NNTPyDecoder(nntp.getArticleName());
+									// ydec.decodeParts();
+									
+									YEncDecoder decoder = new YEncDecoder();
+									nntp.bodyArticle(nntp.getArticleName());
+									decoder.setInputStream(nntp);
+									OutputStream out = new BufferedOutputStream(new FileOutputStream(decoder.getFileName()));
+									decoder.setOutputStream(out);
+									decoder.decode();
+									System.out.println("decoded file \"" +
+													 decoder.getFileName() +
+													 "\" [" + decoder.getSize() + " bytes]");
+									
+								} catch (IOException e) {
+									System.out.println("Couldn't connect to news server.");
+								} catch (NNTPNoSuchArticleException e) {
+									// don't want to know if the article isn't there.
+									System.out.println("Couldn't find article: " + e.getMessage());
+								} catch (ar.com.ktulu.yenc.YEncException e) {
+									;
+									System.out.println("Couldn't decode article: " + e.getMessage());
+								} 
+						 */
+					//		}
+					//	});
+					//	decodeThread.start();
 						
-					//	NNTPyDecoder ydec = new NNTPyDecoder(nntp.getArticleName());
-					//	ydec.decodeParts();
-
+						//	NNTPyDecoder ydec = new NNTPyDecoder(nntp.getArticleName());
+						//	ydec.decodeParts();
+						
 						starttime =currenttime;
 						startarticle = currentarticle;
 						
@@ -82,13 +107,8 @@ public class NzbCollectorThread implements Runnable {
 				} catch (NNTPNoSuchArticleException e) {
 					;
 					// don't want to know if the article isn't there.
-						System.out.println("Couldn't find article: " + e.getMessage());
-				} catch (ar.com.ktulu.yenc.YEncException e) {
-					;
-					System.out.println("Couldn't decode article: " + e.getMessage());
-				} catch (NNTPConnectionResponseException e) {
-					System.out.println("Couldn't connect to news server (to decode article): " + e.getMessage());
-				}
+					System.out.println("Couldn't find article: " + e.getMessage());
+				} 
 			}
 		} catch (IOException e) {
 			System.out.println ("Exiting due to Network Error: " + e.getMessage());

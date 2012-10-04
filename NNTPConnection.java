@@ -309,7 +309,9 @@ public class NNTPConnection extends InputStream {
 	
 	
 	public int read() throws IOException {
-		return articleBuffer.charAt(articlePointer++);
+		if (articlePointer<articleBuffer.length())
+			return articleBuffer.getBytes()[articlePointer++];
+		return -1;
 	}
 	
 	/** 
@@ -890,12 +892,12 @@ public class NNTPConnection extends InputStream {
 		
 		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
 		
-		String a = readAsString();
+		// String a = readAsString();
 		
-		out.write (a.getBytes(),0,a.length());
+		out.write (articleBuffer.getBytes(),0,articleBuffer.length());
 		out.close();
 		
-		return a.length();
+		return articleBuffer.length();
 		
 	}
 	

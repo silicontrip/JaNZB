@@ -31,11 +31,9 @@ public class NNTPget {
 				
 				//nntp.setGroup(group);
 								
-				//nntp.setArticleName(args[0]);
-				//nntp.writeArticleToFile(new File(args[0]));
+				nntp.bodyArticle(args[0]);
+				nntp.writeArticleToFile(new File(args[0]));
 				
-				NNTPyDecoder ydec = new NNTPyDecoder(nntp,args);
-				ydec.decodeParts();
 				
 								
 				try {
@@ -46,6 +44,9 @@ public class NNTPget {
 					System.out.println("Problem disconnecting from NNTP server: " + e.getMessage());
 				}
 				
+				NNTPyDecoder ydec = new NNTPyDecoder(args);
+				ydec.decodeParts();
+
 				
 			} catch (YEncException e) {
 				System.out.println("Could not decode the articles: " + e.getMessage());

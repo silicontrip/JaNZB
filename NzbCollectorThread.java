@@ -63,6 +63,10 @@ public class NzbCollectorThread implements Runnable {
 						Date d = new Date (remain.longValue() + currenttime);
 						System.out.println(subject + " : " + d.toString() + " : " +  nntp.getArticleName() );
 						
+						
+						NNTPyDecoder ydec = new NNTPyDecoder(nntp.getArticleName());
+						ydec.decodeParts();
+
 						starttime =currenttime;
 						startarticle = currentarticle;
 						
@@ -70,7 +74,12 @@ public class NzbCollectorThread implements Runnable {
 				} catch (NNTPNoSuchArticleException e) {
 					;
 					// don't want to know if the article isn't there.
-					//	System.out.println("Couldn't find article: " + e.getMessage());
+						System.out.println("Couldn't find article: " + e.getMessage());
+				} catch (ar.com.ktulu.yenc.YEncException e) {
+					;
+					System.out.println("Couldn't decode article: " + e.getMessage());
+				} catch (NNTPConnectionResponseException e) {
+					System.out.println("Couldn't connect to news server (to decode article): " + e.getMessage());
 				}
 			}
 		} catch (IOException e) {

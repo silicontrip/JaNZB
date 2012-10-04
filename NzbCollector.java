@@ -19,6 +19,7 @@ public class NzbCollector {
 			
 			Integer port = new Integer(fileProperties.getProperty("NewsServerPort"));
 			String host = fileProperties.getProperty("NewsServerHost");
+			
 			// nntp.enableDebug();
 			
 			/*

@@ -4,7 +4,7 @@ import java.util.*;
 import ar.com.ktulu.yenc.*;
 
 public class NNTPyDecoder {
-
+	
 	private String[] articleList;
 	Part[] parts;
 	YEncDecoder decoder;
@@ -25,7 +25,7 @@ public class NNTPyDecoder {
 		nntpHost = fileProperties.getProperty("NewsServerHost");
 		
 	}
-
+	
 	public NNTPyDecoder (String[] a) throws IOException, YEncException, NNTPNoSuchArticleException, NNTPConnectionResponseException
 	{
 		this();
@@ -55,7 +55,7 @@ public class NNTPyDecoder {
 	{
 		NNTPConnection nntp = new NNTPConnection(nntpHost,nntpPort);
 		nntp.connect();
-
+		
 		nntp.bodyArticle(articleName);
 		
 		return nntp;
@@ -80,16 +80,12 @@ public class NNTPyDecoder {
 		
 	}
 	/**
-	 * Sets the article list.  Sorts the articles in part order. Validates all the parts exist and are from the same archive.
+	 * Sets the article list. Makes connection to the news server.
 	 *
 	 * @param articleList a list of the article name to be validated.
-	 * @throws IOException if there was a network error reading from the news server
-	 * @throws YEncException if the articles cannot be decoded. If there are parts missing or if the parts are from different archives.
-	 * @throws NNTPNoSuchArticleException if the article doesn't exist on the news server
-	 * @throws NNTPConnectionResponseException if the news server doesn't respond with the expected connection response
 	 */
 	
-	public void setArticleList(String[] articleList) throws IOException, YEncException, NNTPNoSuchArticleException, NNTPConnectionResponseException
+	public void setArticleList(String[] articleList) throws IOException,  NNTPNoSuchArticleException, NNTPConnectionResponseException
 	{ 		
 		parts = new Part[articleList.length];
 		
@@ -97,19 +93,34 @@ public class NNTPyDecoder {
 		
 		// get info on all parts
 		for (int i = 0; i < articleList.length; i++) {
-			decoder.reset();
 			parts[i] = new Part();
 			parts[i].file = articleList[i];
 			parts[i].nntp = nntpFactory(parts[i].file);
+		}
+		
+		
+	}
+	/**
+	 * Sorts the articles in part order. Validates all the parts exist and are from the same archive.
+	 *
+	 * @throws IOException if there was a network error reading from the news server
+	 * @throws YEncException if the articles cannot be decoded. If there are parts missing or if the parts are from different archives.
+	 * @throws NNTPNoSuchArticleException if the article doesn't exist on the news server
+	 * @throws NNTPConnectionResponseException if the news server doesn't respond with the expected connection response
+	 */
+	public void validateArticleList() throws IOException, YEncException, NNTPNoSuchArticleException, NNTPConnectionResponseException
+	{
+		for (int i = 0; i < articleList.length; i++) {
+			decoder.reset();
 			decoder.setInputStream( parts[i].nntp );
 			parts[i].name = decoder.getFileName();
 			parts[i].part = decoder.getPartNumber();
 			parts[i].pbegin = decoder.getPartBegin();
 			parts[i].pend = decoder.getPartEnd();
 		}
-	
+		
 		Arrays.sort(parts); 
-
+		
 		for (int i = 0; i < parts.length-1; i++) {
 			if (parts[i].part+1 != parts[i+1].part)
 				throw new MissingPartsException("Parts are " +
@@ -123,7 +134,7 @@ public class NNTPyDecoder {
 				throw new YEncException("Missing data");
 		}
 	}
-
+	
 	public void decodeParts() throws IOException, YEncException, NNTPNoSuchArticleException, NNTPUnexpectedResponseException
 	{
 		OutputStream out = null;
@@ -149,7 +160,7 @@ public class NNTPyDecoder {
 			
 			
 			decoder.decode();
-		
+			
 			System.out.println("Done.");
 			
 			parts[i].nntp.disconnect();
@@ -157,25 +168,25 @@ public class NNTPyDecoder {
 		}
 	}		
 	
-class Part implements Comparable {
-	String file, name;
-	int part;
-	NNTPConnection nntp;
-	long pbegin, pend;
-	
-	/**
-	 * Note: this class has a natural ordering that is inconsistent
-	 * with equals.
-	 */
-	public int compareTo(Object o) {
-		if (!(o instanceof Part))
-			throw new ClassCastException("object is not " +
-										 "instance of Part");
-		Part po = ((Part)o);
+	class Part implements Comparable {
+		String file, name;
+		int part;
+		NNTPConnection nntp;
+		long pbegin, pend;
 		
-		if (part < po.part) return -1;
-		if (part > po.part) return 1;
-		return 0;
+		/**
+		 * Note: this class has a natural ordering that is inconsistent
+		 * with equals.
+		 */
+		public int compareTo(Object o) {
+			if (!(o instanceof Part))
+				throw new ClassCastException("object is not " +
+											 "instance of Part");
+			Part po = ((Part)o);
+			
+			if (part < po.part) return -1;
+			if (part > po.part) return 1;
+			return 0;
+		}
 	}
-}
 }

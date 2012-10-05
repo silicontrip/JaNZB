@@ -1,7 +1,4 @@
 
-public class NNTPNoSuchGroupException extends Exception { 
-	
-	private static final long serialVersionUID = 1L;
+public class NNTPNoSuchGroupException extends NNTPException { 
 	public NNTPNoSuchGroupException(String message) { super(message); }
-	
 }

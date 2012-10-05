@@ -1,8 +1,4 @@
 
-public class NNTPConnectionResponseException extends Exception { 
-	
-	private static final long serialVersionUID = 1L;
-
+public class NNTPConnectionResponseException extends NNTPException { 
 	NNTPConnectionResponseException(String message) { super(message); }
-	
 }

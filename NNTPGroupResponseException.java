@@ -1,7 +1,4 @@
 
-public class NNTPGroupResponseException extends Exception { 
-	
-	private static final long serialVersionUID = 1L;
+public class NNTPGroupResponseException extends NNTPException { 
 	public NNTPGroupResponseException(String message) { super(message); }
-	
 }

@@ -2,6 +2,13 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+/**
+ * A wrapper class for the NNTP protocol.
+ * Establishes a connection to the news server, checks for valid responses.
+ * Supports reading articles only, no posting support.
+ * Extends the InputStream Class for reading articles as InputStreams.
+ 
+ */
 
 public class NNTPConnection extends InputStream {
 	
@@ -44,15 +51,11 @@ public class NNTPConnection extends InputStream {
 	/** 
 	 * Class constructor.
 	 */
-	public NNTPConnection () {
-		//	endMarkerString = new String (endmarker);
-		//printHex(endMarkerString);
-		
+	public NNTPConnection () {		
 		buffer = new byte[BUFFER_SIZE];
 		buffer2 = new byte[BUFFER_SIZE];
 		
 		network = new TCPConnection();
-		
 	}
 	
 	/** 
@@ -715,7 +718,7 @@ public class NNTPConnection extends InputStream {
 		try {
 			s = checkResponse("223");
 		} catch (NNTPUnexpectedResponseException e) {
-			throw new NNTPNoSuchArticleException(e.getMessage());
+			throw new NNTPNoSuchArticleException(e.getMessage(),articleNumber);
 		}
 		s = s.replaceAll("(\\r|\\n)", ""); // is this needed anymore. readLine should strip end of line characters
 		String param[] = s.split(" ");
@@ -745,13 +748,14 @@ public class NNTPConnection extends InputStream {
 		String r ;
 		String q=null;
 		
+		// the dot end of data marker is only used if the correct response is received.
 		setEndCommandDot();
 		sendCommand("HEAD " + article + "\r\n");
 		
 		try {
 			r= checkResponse("221");		
 		} catch (NNTPUnexpectedResponseException e) {
-			throw new NNTPNoSuchArticleException(e.getMessage());
+			throw new NNTPNoSuchArticleException(e.getMessage(),article);
 		}
 		
 
@@ -835,7 +839,7 @@ public class NNTPConnection extends InputStream {
 		try {
 			checkResponse("220");
 		} catch (NNTPUnexpectedResponseException e) {
-			throw new NNTPNoSuchArticleException(e.getMessage());
+			throw new NNTPNoSuchArticleException(e.getMessage(),articleName);
 		}
 		
 		start = System.currentTimeMillis();
@@ -865,7 +869,7 @@ public class NNTPConnection extends InputStream {
 		try {
 			checkResponse("222");
 		} catch (NNTPUnexpectedResponseException e) {
-			throw new NNTPNoSuchArticleException(e.getMessage());
+			throw new NNTPNoSuchArticleException(e.getMessage(),articleName);
 		}
 		
 		start = System.currentTimeMillis();

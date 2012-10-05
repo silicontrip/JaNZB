@@ -63,7 +63,7 @@ public class NzbCollectorThread implements Runnable {
 						Double aps = 1.0*(currentarticle - startarticle) / (currenttime - starttime)*1.0;
 						Double remain = (end - i) / aps ;
 						Date d = new Date (remain.longValue() + currenttime);
-						System.out.println(subject + " : " + d.toString() + " : " +  nntp.getArticleName() );
+						System.out.println("" + i + " : " +  subject + " : " + nntp.getArticleName()  + " : " +  d.toString() );
 						
 					//	Thread decodeThread = new Thread (new Runnable() {
 					//		public void run() 

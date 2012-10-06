@@ -20,22 +20,22 @@ public class NNTPget {
 			
 			Integer port = new Integer(fileProperties.getProperty("NewsServerPort"));
 			String host = fileProperties.getProperty("NewsServerHost");
-			nntp = new NNTPConnection(host,port);
+			//nntp = new NNTPConnection(host,port);
 			
 			try {
-				//nntp.enableDebug();
+				// nntp.enableDebug();
 
-				nntp.connect();
+				//nntp.connect();
 				
 				//String group = fileProperties.getProperty("NewsServerGroup");
 				
 				//nntp.setGroup(group);
 								
-				nntp.bodyArticle(args[0]);
-				nntp.writeArticleToFile(new File(args[0]));
+				//nntp.bodyArticle(args[0]);
+				//nntp.writeArticleToFile(new File(args[0]));
 				
 				
-								
+				/*				
 				try {
 					nntp.disconnect();
 				} catch (IOException e) {
@@ -43,11 +43,12 @@ public class NNTPget {
 				} catch (NNTPUnexpectedResponseException e) {
 					System.out.println("Problem disconnecting from NNTP server: " + e.getMessage());
 				}
-				
+				*/
 				NNTPyDecoder ydec = new NNTPyDecoder(args);
 				ydec.decodeParts();
 
-				
+			} catch (NNTPUnexpectedResponseException e) {
+				System.out.println("NNTP server didn't respond properly: " + e.getMessage());
 			} catch (YEncException e) {
 				System.out.println("Could not decode the articles: " + e.getMessage());
 			} catch (IOException e) {

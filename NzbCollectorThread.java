@@ -49,8 +49,6 @@ public class NzbCollectorThread implements Runnable {
 					nntp.headArticle(is);
 					//articleHeader = nntp.getHeader(is);
 					
-					
-					
 					String subject = nntp.getArticleSubject();
 					
 					//	System.out.println ("Subject: " + subject + "match: " + match);
@@ -108,6 +106,7 @@ public class NzbCollectorThread implements Runnable {
 					;
 					// don't want to know if the article isn't there.
 					System.out.println("Couldn't find article: " + e.getMessage());
+					e.printStackTrace();
 				} 
 			}
 		} catch (IOException e) {

@@ -54,6 +54,7 @@ public class NNTPyDecoder {
 	protected NNTPConnection nntpFactory(String articleName) throws IOException, NNTPNoSuchArticleException, NNTPConnectionResponseException
 	{
 		NNTPConnection nntp = new NNTPConnection(nntpHost,nntpPort);
+		//nntp.enableDebug();
 		nntp.connect();
 		
 		nntp.bodyArticle(articleName);

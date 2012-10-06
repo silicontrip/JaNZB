@@ -72,6 +72,7 @@ public class NzbCollector {
 						for (int i=0; i<threads; i++) {
 
 							NNTPConnection nntpthread = new NNTPConnection(host,port);
+							//nntpthread.enableDebug();
 							nntpthread.connect();
 							nntpthread.setGroup(group);
 							allThreads[i] = new Thread (new NzbCollectorThread(start+i, end,threads,nntpthread,".*nzb.*"));

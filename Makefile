@@ -8,7 +8,7 @@ classes: janzb.class  NNTPindex.class NzbMake.class  NzbCollector.class  NNTPget
 	NNTPConnectionResponseException.class NNTPGroupResponseException.class NNTPNoSuchArticleException.class NNTPNoSuchGroupException.class NNTPUnexpectedResponseException.class
 
 %.class: %.java
-	javac -Xlint:unchecked -target 1.5 $<
+	javac  -Xlint:deprecation -Xlint:unchecked -target 1.5 $<
 
 clean:
 	rm *.class

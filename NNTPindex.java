@@ -21,6 +21,7 @@ public class NNTPindex {
 			String host = fileProperties.getProperty("NewsServerHost");
 			nntp = new NNTPConnection(host,port);
 			
+			//nntp.enableDebug();
 			try {
 				nntp.connect();
 				
@@ -30,29 +31,16 @@ public class NNTPindex {
 				
 				Integer start = nntp.getGroupStart();
 				Integer end = nntp.getGroupEnd();
-				Integer threads = new Integer(fileProperties.getProperty("Threads"));
 
-				Thread allThreads[];
+				for (Integer i=start; i<end; i++) 
+				{
 				
-				allThreads = new Thread[threads];
-				
-				for (int i=0; i<threads; i++) {
-					
-					NNTPConnection nntpthread = new NNTPConnection(host,port);
-					nntpthread.connect();
-					nntpthread.setGroup(group);
-					allThreads[i] = new Thread (new NzbCollectorThread(start+i, end,threads,nntpthread,args[0]));
-				}
-				
-				for (int i=0; i<threads; i++) {
-					allThreads[i].start();
-				}
-				
-				for (int i=0; i<threads; i++) {
 					try {
-						allThreads[i].join();
-					} catch (InterruptedException e) {
-						System.out.println("What interrupted us? " + e.getMessage());
+						nntp.headArticle(i.toString());
+					
+						System.out.println (nntp.getArticleDate() + " : " + nntp.getArticleBytes() + " : " + nntp.getArticleSubject());
+					} catch (NNTPException e) {
+						System.out.println("Couldn't read article "+ i);
 					}
 				}
 				

@@ -163,7 +163,7 @@ public class TCPConnection {
 	public int receiveResponse (byte[] comm,int off,int len) throws IOException {
 		int i = in.read(comm,off,len);
 		if (this.debug)
-			System.out.print ("<< " + (new String (comm)));
+			System.out.print ("<< " + (new String (comm,0,i)));
 		return i;
 	}
 	
@@ -183,6 +183,9 @@ public class TCPConnection {
 		return i;
 	}
 	
+	public int read () throws IOException {
+		return in.read();
+	}
 	
 	
 }

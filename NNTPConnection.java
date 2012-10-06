@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.text.*;
 
 /**
  * A wrapper class for the NNTP protocol.
@@ -44,7 +45,7 @@ public class NNTPConnection extends InputStream {
 	
 	private String articleName;
 	
-	private String articleBuffer;
+	private byte[] articleBuffer;
 	private int articleMarker=0;
 	private int articlePointer=0;
 	
@@ -204,14 +205,14 @@ public class NNTPConnection extends InputStream {
 	 * @exception IOException if a network error occurs
 	 */
 	
-	public void sendCommand (String comm) throws IOException { internal_reset(); network.sendCommand(comm); }
+	protected void sendCommand (String comm) throws IOException { internal_reset(); network.sendCommand(comm); }
 	/** 
 	 * Sends raw data to the NNTP server.
 	 *
 	 * @param comm the byte array to send to the server
 	 * @exception IOException if a network error occurs
 	 */
-	public void sendCommand (byte[] comm) throws IOException { internal_reset(); network.sendCommand(comm); }
+	protected void sendCommand (byte[] comm) throws IOException { internal_reset(); network.sendCommand(comm); }
 	
 	/** 
 	 * returns if the Stream is seekable.
@@ -226,7 +227,7 @@ public class NNTPConnection extends InputStream {
 	 * @see java.io.InputStream#available
 	 */
 	
-	public int available() { return articleBuffer.length() - articlePointer; }
+	public int available() { return articleBuffer.length - articlePointer; }
 	
 	/** 
 	 * returns data read from the NNTP server as a string. Until the terminating marker.
@@ -270,7 +271,7 @@ public class NNTPConnection extends InputStream {
 		String s = new String();
 
 		while (s.indexOf("\r\n") == -1 && i != -1) {
-			i = this.internal_read();
+			i = network.read();
 			if (i != -1) {
 				b[0] = (byte)i;
 				s = s.concat(new String(b));
@@ -312,8 +313,8 @@ public class NNTPConnection extends InputStream {
 	
 	
 	public int read() throws IOException {
-		if (articlePointer<articleBuffer.length())
-			return articleBuffer.getBytes()[articlePointer++];
+		if (articlePointer<articleBuffer.length)
+			return articleBuffer[articlePointer++];
 		return -1;
 	}
 	
@@ -413,8 +414,8 @@ public class NNTPConnection extends InputStream {
 		
 		articlePointer += n;
 		
-		if (articlePointer >= articleBuffer.length()) 
-			articlePointer = articleBuffer.length() -1;
+		if (articlePointer >= articleBuffer.length) 
+			articlePointer = articleBuffer.length -1;
 		
 		return articlePointer - oldPointer;
 	}
@@ -757,18 +758,21 @@ public class NNTPConnection extends InputStream {
 		} catch (NNTPUnexpectedResponseException e) {
 			throw new NNTPNoSuchArticleException(e.getMessage(),article);
 		}
-		
+		//setEndCommandDot();
 
-		while (r.length() > 0) {
+
+		while (".".compareTo(r) != 0 ) {
 			r = readLine();
 
+			// System.out.println("read: " + r);
+			
 			String[] s = splitHeader(r);
 			
 			articleHeader.put(s[0],s[1]);
 
 		}
 		
-		this.articleName = articleHeader.get("Message-ID");
+		this.articleName = getArticleMessageID();
 	}
 	
 	/**
@@ -806,6 +810,27 @@ public class NNTPConnection extends InputStream {
 	 */
 	
 	public String getArticleSubject() { return this.articleHeader.get("Subject"); }
+	public Date getArticleDate() { 
+		String sDate = this.articleHeader.get("Date"); 
+		if (sDate != null) {
+		
+			SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm:ss zzz");
+			return sdf.parse(sDate,new ParsePosition(0));
+			
+		}
+		return null;
+	}
+	public String getArticleLines() { return this.articleHeader.get("Lines"); }
+	public String getArticleBytes() { return this.articleHeader.get("Bytes"); }
+	public String getArticlePath() { return this.articleHeader.get("Path"); }
+	public String getArticleFrom() { return this.articleHeader.get("From"); }
+	public String getArticleNewsgroups() { return this.articleHeader.get("Newsgroups"); }
+	public String getArticleMessageID() { return this.articleHeader.get("Message-ID"); }
+	public String getArticleOrganization() { return this.articleHeader.get("Organization"); }
+	public String getArticleNNTPPostingHost() { return this.articleHeader.get("NNTP-Posting-Host"); }
+	public String getArticleXref() { return this.articleHeader.get("Xref"); }
+
+
 	
 	
 	/**
@@ -841,11 +866,11 @@ public class NNTPConnection extends InputStream {
 		} catch (NNTPUnexpectedResponseException e) {
 			throw new NNTPNoSuchArticleException(e.getMessage(),articleName);
 		}
-		
+
 		start = System.currentTimeMillis();
 		split = start;
 		
-		articleBuffer = this.readAsString();
+		articleBuffer = this.readAsString().getBytes();
 
 	}
 	
@@ -871,11 +896,15 @@ public class NNTPConnection extends InputStream {
 		} catch (NNTPUnexpectedResponseException e) {
 			throw new NNTPNoSuchArticleException(e.getMessage(),articleName);
 		}
-		
+
 		start = System.currentTimeMillis();
 		split = start;
 		
-		articleBuffer = this.readAsString();
+		articleBuffer = this.readAsString().getBytes();
+		
+		
+		System.out.println("Read bytes: " + articleBuffer.length);
+		
 	}
 	
 	
@@ -904,10 +933,10 @@ public class NNTPConnection extends InputStream {
 		
 		// String a = readAsString();
 		
-		out.write (articleBuffer.getBytes(),0,articleBuffer.length());
+		out.write (articleBuffer,0,articleBuffer.length);
 		out.close();
 		
-		return articleBuffer.length();
+		return articleBuffer.length;
 		
 	}
 	

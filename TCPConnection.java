@@ -184,7 +184,13 @@ public class TCPConnection {
 	}
 	
 	public int read () throws IOException {
-		return in.read();
+		byte[] b = new byte[1];
+		int i = in.read();
+		b[0]=(byte)i;
+		if (this.debug)
+			System.out.println ("<< " + (new String (b)));
+		return i;
+
 	}
 	
 	

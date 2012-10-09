@@ -157,7 +157,7 @@ public class NNTPConnection extends InputStream {
 		} catch (NNTPUnexpectedResponseException e) {
 			throw new NNTPConnectionResponseException(e.getMessage());
 		}
-		
+		internal_reset();
 	}
 	
 	/** 
@@ -180,14 +180,21 @@ public class NNTPConnection extends InputStream {
 	}
 	
 	/** 
-	 * this resets the InputStreamPointer to the position set by mark.
+	 * this does nothing as mark is not supported.
 	 *
 	 * @see java.io.InputStream#reset
 	 * @see #mark(int)
 	 */
 	public void reset() { 
-		articlePointer = articleMarker;
+		;
 	}
+	
+	/** 
+	 * returns if the Stream is seekable.
+	 *
+	 * @see java.io.InputStream#markSupported
+	 */
+	public boolean markSupported() { return false; }
 	
 	
 	/** 
@@ -214,20 +221,14 @@ public class NNTPConnection extends InputStream {
 	 */
 	protected void sendCommand (byte[] comm) throws IOException { internal_reset(); network.sendCommand(comm); }
 	
-	/** 
-	 * returns if the Stream is seekable.
-	 *
-	 * @see java.io.InputStream#markSupported
-	 */
 	
-	public boolean markSupported() { return true; }
 	/** 
 	 * returns the number of bytes remaining before a blocking operation is required.
 	 *
 	 * @see java.io.InputStream#available
 	 */
 	
-	public int available() { return articleBuffer.length - articlePointer; }
+	public int available() { return buffer_size - buffer_pointer; }
 	
 	/** 
 	 * returns data read from the NNTP server as a string. Until the terminating marker.
@@ -241,12 +242,12 @@ public class NNTPConnection extends InputStream {
 		int i=0;
 		
 		byte[] b = new byte[1];
-		i = this.internal_read();
+		i = this.read();
 		
 		while (i != -1) {
 			b[0] = (byte)i;
 			s = s.concat(new String(b));
-			i = this.internal_read();
+			i = this.read();
 		}
 		return s;
 		
@@ -254,13 +255,12 @@ public class NNTPConnection extends InputStream {
 	
 	
 	/** 
-	 * returns data read from the NNTP server as a string. Until the end of line character or terminating marker, 
+	 * returns data read from the NNTP server as a string. Until the end of line character or end of stream, 
 	 * which ever is first.
 	 *
 	 * @return a String containing the server response
 	 * @exception IOException if a network error occurs
 	 */
-	
 	
 	public String readLine () throws IOException {
 		
@@ -289,8 +289,7 @@ public class NNTPConnection extends InputStream {
 	
 	/** 
 	 * Marks the current position in the Input Stream.
-	 * Normally the readlimit arguments tells this input stream to allow that many bytes to be read before the mark position gets invalidated.
-	 * However as this uses a buffer readlimit is ignored and is treated as infinite.
+	 * Does nothing. as mark is not supported. But I am thinking about how to implement it.
 	 *
 	 * @param readlimit unused and is treated as infinite.
 	 */
@@ -300,23 +299,6 @@ public class NNTPConnection extends InputStream {
 		articleMarker = articlePointer;
 	}
 	
-	/** 
-	 * returns a single byte of data read from the NNTP server as an integer. Until the terminating marker.
-	 * this method uses a buffer which is populated by the {@link getArticle(String)} or {@link bodyArticle(String)} commands.
-	 * it should support seeking operations.
-	 *
-	 * @return a byte of data or -1 if the terminating marker is seen.
-	 * @exception IOException if a network error occurs
-	 * @see #setEndCommand(byte[])
-	 * @see java.io.InputStream#read
-	 */
-	
-	
-	public int read() throws IOException {
-		if (articlePointer<articleBuffer.length)
-			return articleBuffer[articlePointer++];
-		return -1;
-	}
 	
 	/** 
 	 * returns a single byte of data read from the NNTP server as an integer. Until the terminating marker.
@@ -329,7 +311,7 @@ public class NNTPConnection extends InputStream {
 	 * @see java.io.InputStream#read
 	 */
 	
-	private int internal_read() throws IOException {
+	public int read() throws IOException {
 		
 		if (buffer_pointer >= buffer_size) {
 			if (!end_of_data) {
@@ -397,27 +379,26 @@ public class NNTPConnection extends InputStream {
 	 */
 	public void close () throws IOException
 	{
-		articlePointer = 0;
-		articleMarker = 0;
-	//	while (this.internal_read() != -1);
-	//	this.reset();
+		while (this.read() != -1);
+		this.internal_reset();
 	}
 	
 	/** 
 	 * skips over n bytes of data from the current operation's InputStream.
-	 
+	 * @param n  the number of bytes to skip.
+	 * @return the number of bytes actually skipped. which may be less than n
 	 */
 	public long skip (long n)
 	{
 	
-		long oldPointer = articlePointer;
+		long oldPointer = buffer_pointer;
 		
-		articlePointer += n;
+		buffer_pointer += n;
 		
-		if (articlePointer >= articleBuffer.length) 
-			articlePointer = articleBuffer.length -1;
+		if (buffer_pointer >= buffer_size) 
+			buffer_pointer = buffer_size -1;
 		
-		return articlePointer - oldPointer;
+		return buffer_pointer - oldPointer;
 	}
 	
 	
@@ -529,6 +510,7 @@ public class NNTPConnection extends InputStream {
 	 * Sets the end of data marker.  This is used to signify the end of data from the current NNTP command.
 	 * Some commands end with a newline and some end with a single . on a line.
 	 *
+	 * @deprecated use {@link setEndCommandNewline()} or {@link setEndCommandDot}
 	 * @param comm  the byte array buffer of the end of data marker.
 	 */
 	
@@ -733,67 +715,6 @@ public class NNTPConnection extends InputStream {
 		
 	}
 		
-	/**
-	 * sends the HEAD command to the news server and sets the current article to the response.
-	 * stores the information about the current article.
-	 *
-	 * @param article the name of the article.
-	 * @exception IOException if a network error occurs
-	 * @exception NNTPNoSuchArticleException if the article cannot be found or if a articleNumber is used and there is no current group.
-	 */
-	
-	
-	public void headArticle(String article) throws IOException,NNTPNoSuchArticleException {
-		
-		articleHeader = new HashMap<String,String>();
-		String r ;
-		String q=null;
-		
-		// the dot end of data marker is only used if the correct response is received.
-		setEndCommandDot();
-		sendCommand("HEAD " + article + "\r\n");
-		
-		try {
-			r= checkResponse("221");		
-		} catch (NNTPUnexpectedResponseException e) {
-			throw new NNTPNoSuchArticleException(e.getMessage(),article);
-		}
-		//setEndCommandDot();
-
-
-		while (".".compareTo(r) != 0 ) {
-			r = readLine();
-
-			// System.out.println("read: " + r);
-			
-			String[] s = splitHeader(r);
-			
-			articleHeader.put(s[0],s[1]);
-
-		}
-		
-		this.articleName = getArticleMessageID();
-	}
-	
-	/**
-	 * splits the input string on the first colon seen.
-	 *
-	 * @param s the string to split
-	 * @return a String array containing the key and value.
-	 */
-	
-	
-	private String[] splitHeader(String s)
-	{
-		int colon = s.indexOf(": ");
-		String r[] = new String[2];
-		
-		if (colon != -1) {
-			r[0]  = new String(s.getBytes(),0,colon);
-			r[1] = new String(s.getBytes(),colon+2,s.length()-colon-2);
-		}
-		return r;
-	}
 	
 	/**
 	 * returns the name of the current article in the form: <article-id@server>
@@ -810,12 +731,21 @@ public class NNTPConnection extends InputStream {
 	 */
 	
 	public String getArticleSubject() { return this.articleHeader.get("Subject"); }
+	
+	public String getArticleDateAsString () { return this.articleHeader.get("Date"); }
 	public Date getArticleDate() { 
-		String sDate = this.articleHeader.get("Date"); 
+		String sDate = getArticleDateAsString(); 
 		if (sDate != null) {
-		
-			SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm:ss zzz");
-			return sdf.parse(sDate,new ParsePosition(0));
+			SimpleDateFormat sdf;
+			Date checkDate;
+			
+			sdf = new SimpleDateFormat("dd MMM yyyy HH:mm:ss zzz");
+			checkDate =  sdf.parse(sDate,new ParsePosition(0));
+			if (checkDate != null ) return checkDate;
+			
+			sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss ZZZZZ");
+			checkDate =  sdf.parse(sDate,new ParsePosition(0));
+			if (checkDate != null ) return checkDate;
 			
 		}
 		return null;
@@ -829,9 +759,6 @@ public class NNTPConnection extends InputStream {
 	public String getArticleOrganization() { return this.articleHeader.get("Organization"); }
 	public String getArticleNNTPPostingHost() { return this.articleHeader.get("NNTP-Posting-Host"); }
 	public String getArticleXref() { return this.articleHeader.get("Xref"); }
-
-
-	
 	
 	/**
 	 * sets the current article 
@@ -855,7 +782,7 @@ public class NNTPConnection extends InputStream {
 	
 	public void getArticle (String articleName) throws IOException , NNTPNoSuchArticleException { 
 
-		this.close();
+		// this.close();
 		
 		this.articleName = articleName; 
 		
@@ -870,7 +797,7 @@ public class NNTPConnection extends InputStream {
 		start = System.currentTimeMillis();
 		split = start;
 		
-		articleBuffer = this.readAsString().getBytes();
+		//articleBuffer = this.readAsString().getBytes();
 
 	}
 	
@@ -885,7 +812,7 @@ public class NNTPConnection extends InputStream {
 	public void bodyArticle (String articleName) throws IOException , NNTPNoSuchArticleException { 
 		
 		
-		this.close();
+	//	this.close();
 		
 		this.articleName = articleName; 
 		
@@ -900,11 +827,72 @@ public class NNTPConnection extends InputStream {
 		start = System.currentTimeMillis();
 		split = start;
 		
-		articleBuffer = this.readAsString().getBytes();
+	//	articleBuffer = this.readAsString().getBytes();
 		
 		
-		System.out.println("Read bytes: " + articleBuffer.length);
+	//	System.out.println("Read bytes: " + articleBuffer.length);
 		
+	}
+	
+	/**
+	 * sends the HEAD command to the news server and sets the current article to the response.
+	 * stores the information about the current article.
+	 *
+	 * @param article the name of the article.
+	 * @exception IOException if a network error occurs
+	 * @exception NNTPNoSuchArticleException if the article cannot be found or if a articleNumber is used and there is no current group.
+	 */
+	
+	
+	public void headArticle(String article) throws IOException,NNTPNoSuchArticleException {
+		
+		articleHeader = new HashMap<String,String>();
+		String r ;
+		String q=null;
+		
+		// the dot end of data marker is only used if the correct response is received.
+		setEndCommandDot();
+		sendCommand("HEAD " + article + "\r\n");
+		
+		try {
+			r= checkResponse("221");		
+		} catch (NNTPUnexpectedResponseException e) {
+			throw new NNTPNoSuchArticleException(article + ": " + e.getMessage(),article);
+		}
+		
+		
+		while (".".compareTo(r) != 0 ) {
+			r = readLine();
+			
+			// System.out.println("read: " + r);
+			
+			String[] s = splitHeader(r);
+			
+			articleHeader.put(s[0],s[1]);
+			
+		}
+		
+		this.articleName = getArticleMessageID();
+	}
+	
+	/**
+	 * splits the input string on the first colon seen.
+	 *
+	 * @param s the string to split
+	 * @return a String array containing the key and value.
+	 */
+	
+	
+	private String[] splitHeader(String s)
+	{
+		int colon = s.indexOf(": ");
+		String r[] = new String[2];
+		
+		if (colon != -1) {
+			r[0]  = new String(s.getBytes(),0,colon);
+			r[1] = new String(s.getBytes(),colon+2,s.length()-colon-2);
+		}
+		return r;
 	}
 	
 	

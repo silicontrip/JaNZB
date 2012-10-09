@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.*;
 import java.net.*;
+import java.text.*;
+
 
 public class NNTPindex {
 	
@@ -21,28 +23,58 @@ public class NNTPindex {
 			String host = fileProperties.getProperty("NewsServerHost");
 			nntp = new NNTPConnection(host,port);
 			
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZ");
+			Date startDate = sdf.parse(args[0] + " 00:00:00 GMT",new ParsePosition(0));
+			Date endDate = sdf.parse(args[1] + " 00:00:00 GMT",new ParsePosition(0));
+
+			
 			//nntp.enableDebug();
 			try {
 				nntp.connect();
 				
 				String group = fileProperties.getProperty("NewsServerGroup");
-				
+				Integer threads = new Integer(fileProperties.getProperty("Threads"));
+
 				nntp.setGroup(group);
 				
 				Integer start = nntp.getGroupStart();
 				Integer end = nntp.getGroupEnd();
 
-				for (Integer i=start; i<end; i++) 
-				{
+				System.out.println("Group: " + group + " " + start +"-"+end);
+
 				
-					try {
-						nntp.headArticle(i.toString());
+				int articleStart = huntDate(start,end,startDate,nntp);
+				int articleEnd = huntDate(start,end,endDate,nntp);
+				int articleNumber = articleEnd-articleStart;
+				System.out.println("Range " + articleStart + "-" + articleEnd);
+				System.out.println("Articles " + articleNumber);
+				
+				int found = huntSubject(articleStart,articleEnd,args[2],nntp);
+				
+				/*
+				Thread allThreads[];
+				allThreads = new Thread[threads];
+				
+				for (int i=0; i<threads; i++) {
 					
-						System.out.println (nntp.getArticleDate() + " : " + nntp.getArticleBytes() + " : " + nntp.getArticleSubject());
-					} catch (NNTPException e) {
-						System.out.println("Couldn't read article "+ i);
+					NNTPConnection nntpthread = new NNTPConnection(host,port);
+					//nntpthread.enableDebug();
+					nntpthread.connect();
+					nntpthread.setGroup(group);
+					allThreads[i] = new Thread (new NzbCollectorThread(articleStart+i*100, articleEnd,threads*100,nntpthread,".*"));
+					allThreads[i].start();
+				}
+				
+				
+				for (int i=0; i<threads; i++) {
+					try {
+						allThreads[i].join();
+					} catch (InterruptedException e) {
+						System.out.println("What interrupted us? " + e.getMessage());
 					}
 				}
+				*/
+				
 				
 			} catch (NumberFormatException e) {
 				System.out.println("Could not read the group articles range: " + e.getMessage());
@@ -71,5 +103,69 @@ public class NNTPindex {
 		} 
 		
 	}
+	
+	protected static int huntDate (int start, int end, Date searchDate, NNTPConnection nntp) throws IOException {
+		
+		Integer get;
+		do {
+			
+			// What's the difference
+			//				Integer get = (start + end) / 2;
+			 get = start + (end - start) / 2;
+			
+			
+			try {
+				nntp.headArticle(get.toString());
+				// should start recording this.
+				System.out.println (get + " : " + nntp.getArticleDateAsString() + " : " + nntp.getArticleSubject() );
+			} catch (NNTPException e) {
+				System.out.println("Couldn't read article "+ get);
+			}
+			
+			if ( searchDate.compareTo(nntp.getArticleDate()) == 1) { start = get; }
+			if ( searchDate.compareTo(nntp.getArticleDate()) <= 0) { end = get; }
+			
+		//	System.out.println ("distance: " + (end-start));
+			
+		} while (end-start > 1);
+		return start;
+	}		
+	
+	protected static int huntSubject (int articleStart, int articleEnd, String match, NNTPConnection nntp) throws IOException
+	{
+		int articleNumber = articleEnd-articleStart;
+		
+		for (int i=0; 1<<i < articleNumber; i ++)
+		{
+			
+			
+			int step = articleNumber / (1 << i);
+		//	System.out.println ("search: " + (1<<i) + " : " + step); 
+			
+			for (int j=0; j * step < articleNumber; j++) {
+				
+				int get = (j * step) + (step / 2) + articleStart;
+				
+				try {
+					nntp.headArticle(""+get);
+					System.out.println (""+get + " : " + nntp.getArticleDateAsString() + " : " + nntp.getArticleSubject() );
+					
+					if (nntp.getArticleSubject().matches(match)) {
+						return get;
+						
+					}
+					
+				} catch (NNTPException e) {
+					System.out.println("Couldn't read article "+ get);
+				}
+				
+				
+			}
+			
+		}
+	
+		return -1;
+	}
+	
 	
 }

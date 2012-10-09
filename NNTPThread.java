@@ -16,10 +16,10 @@ class NNTPThread extends Thread {
 		
 		FileInputStream fis;
 
-		int bytes;
+		long bytes;
 		try {
 			
-			nc.setArticleName(articleName);
+			nc.bodyArticle(articleName);
 			bytes = nc.writeArticleToFile(segmentFile);
 			nc.unlock();
 			

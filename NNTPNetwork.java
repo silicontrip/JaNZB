@@ -70,9 +70,9 @@ public class NNTPNetwork extends ArrayList<NNTPConnection>  implements Serializa
 	
 	}
 	
-	public int getNNTParticle (String a , File f) throws IOException, NNTPNoSuchArticleException {
+	public long getNNTParticle (String a , File f) throws IOException, NNTPNoSuchArticleException {
 		// find available connection
-		int bytes=-1;
+		long bytes=-1;
 		
 		while (bytes == -1) {
 			
@@ -83,7 +83,7 @@ public class NNTPNetwork extends ArrayList<NNTPConnection>  implements Serializa
 						n.lock();
 						try {
 							long ctime = System.currentTimeMillis();
-							n.setArticleName(a);
+							n.bodyArticle(a);
 							//n.setOutputFile(f);
 							bytes = n.writeArticleToFile(f);
 							long etime = System.currentTimeMillis();

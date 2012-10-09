@@ -915,21 +915,111 @@ public class NNTPConnection extends InputStream {
 	 * @exception IOException if a network error or Disk error occurs
 	 */
 	
-	public int writeArticleToFile(File f) throws IOException {
+	public long writeArticleToFile(File f) throws IOException {
 		
 		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
 		
-		// String a = readAsString();
-		
-		out.write (articleBuffer,0,articleBuffer.length);
-		out.close();
-		
-		return articleBuffer.length;
+		return copy(this,out,true);
 		
 	}
 	
-	
 	public void interupt() throws IOException { network.disconnect(); }
+	
+	// stolen from
+	// http://www.java2s.com/Code/Java/File-Input-Output/CopiesthecontentsofthegivenInputStreamtothegivenOutputStream.htm
+	
+	/**
+     * Copies the contents of the given {@link InputStream}
+     * to the given {@link OutputStream}. Shortcut for
+     * <pre>
+     *   copy(pInputStream, pOutputStream, new byte[8192]);
+     * </pre>
+     * @param pInputStream The input stream, which is being read.
+     * It is guaranteed, that {@link InputStream#close()} is called
+     * on the stream.
+     * @param pOutputStream The output stream, to which data should
+     * be written. May be null, in which case the input streams
+     * contents are simply discarded.
+     * @param pClose True guarantees, that {@link OutputStream#close()}
+     * is called on the stream. False indicates, that only
+     * {@link OutputStream#flush()} should be called finally.
+     *
+     * @return Number of bytes, which have been copied.
+     * @throws IOException An I/O error occurred.
+     */
+    public static long copy(InputStream pInputStream,
+							OutputStream pOutputStream, boolean pClose)
+	throws IOException {
+        return copy(pInputStream, pOutputStream, pClose,
+					new byte[BUFFER_SIZE]);
+    }
+	
+    /**
+     * Copies the contents of the given {@link InputStream}
+     * to the given {@link OutputStream}.
+     * @param pIn The input stream, which is being read.
+     *   It is guaranteed, that {@link InputStream#close()} is called
+     *   on the stream.
+     * @param pOut The output stream, to which data should
+     *   be written. May be null, in which case the input streams
+     *   contents are simply discarded.
+     * @param pClose True guarantees, that {@link OutputStream#close()}
+     *   is called on the stream. False indicates, that only
+     *   {@link OutputStream#flush()} should be called finally.
+     * @param pBuffer Temporary buffer, which is to be used for
+     *   copying data.
+     * @return Number of bytes, which have been copied.
+     * @throws IOException An I/O error occurred.
+     */
+    public static long copy(InputStream pIn,
+							OutputStream pOut, boolean pClose,
+							byte[] pBuffer)
+    throws IOException {
+        OutputStream out = pOut;
+        InputStream in = pIn;
+        try {
+            long total = 0;
+            for (;;) {
+                int res = in.read(pBuffer);
+                if (res == -1) {
+                    break;
+                }
+                if (res > 0) {
+                    total += res;
+                    if (out != null) {
+                        out.write(pBuffer, 0, res);
+                    }
+                }
+            }
+            if (out != null) {
+                if (pClose) {
+                    out.close();
+                } else {
+                    out.flush();
+                }
+                out = null;
+            }
+            in.close();
+            in = null;
+            return total;
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (Throwable t) {
+                    /* Ignore me */
+                }
+            }
+            if (pClose  &&  out != null) {
+                try {
+                    out.close();
+                } catch (Throwable t) {
+                    /* Ignore me */
+                }
+            }
+        }
+    }
+	
 	
 	
 }

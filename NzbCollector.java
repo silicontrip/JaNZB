@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 
-public class NzbCollector {
+public class NzbCollector  {
 	
 	public static void main(String[] args) {
 		
@@ -20,20 +20,8 @@ public class NzbCollector {
 			Integer port = new Integer(fileProperties.getProperty("NewsServerPort"));
 			String host = fileProperties.getProperty("NewsServerHost");
 			
+			// maybe should put this in the properties file.
 			// nntp.enableDebug();
-			
-			/*
-			 Signal.handle(new Signal("INT"), new SignalHandler () {
-			 public void handle(Signal sig) {
-			 
-			 System.out.println("Received SIGINT signal. Will teardown.");
-			 
-			 System.exit(1);
-			 }
-			 });
-			 */
-			
-			//System.out.println("args: " + args.length);
 			
 			for (String group : fileProperties.getProperty("Groups").split(",")) {
 				
@@ -65,7 +53,6 @@ public class NzbCollector {
 							
 							
 							if (args.length ==2 ) {
-								
 								start = new Integer(args[0]);
 								end = new Integer(args[1]);
 							}
@@ -86,7 +73,7 @@ public class NzbCollector {
 								//nntpthread.enableDebug();
 								nntpthread.connect();
 								nntpthread.setGroup(group);
-								allThreads[i] = new Thread (new NzbCollectorThread(ac,nntpthread,".*nzb.*"));
+								allThreads[i] = new Thread (new NzbCollectorThread(new printArticle(),ac,nntpthread,".*nzb.*"));
 								allThreads[i].start();
 							}
 							
@@ -134,5 +121,6 @@ public class NzbCollector {
 		} 
 		
 	}
+	
 	
 }

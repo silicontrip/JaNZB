@@ -5,7 +5,7 @@ all: janzb.jar classes
 classes: janzb.class  NNTPindex.class NzbMake.class  NzbCollector.class  NNTPget.class \
 	NzbCollectorThread.class NNTPyDecoder.class \
 	NNTPNetwork.class NNTPConnection.class NZBfile.class NNTPThread.class NNTPindex.class TCPConnection.class \
-	AtomicCounter.class \
+	AtomicCounter.class printArticle.class \
 	NNTPConnectionResponseException.class NNTPGroupResponseException.class NNTPNoSuchArticleException.class NNTPNoSuchGroupException.class NNTPUnexpectedResponseException.class
 
 %.class: %.java

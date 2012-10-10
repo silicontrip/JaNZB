@@ -12,20 +12,22 @@ public class NzbCollectorThread implements Runnable {
 	private int increment;
 	private NNTPConnection nntp;
 	private String match;
+	private NNTPMatchedArticle callback;
 	
 	private AtomicCounter ac;
 	
-	public NzbCollectorThread (AtomicCounter atom, NNTPConnection nn) {
-		this(atom,nn,".*");
+	public NzbCollectorThread (NNTPMatchedArticle nma, AtomicCounter atom, NNTPConnection nn) {
+		this(nma,atom,nn,".*");
 	}
 	
-	public NzbCollectorThread (AtomicCounter atom, NNTPConnection nn, String ma) {
+	public NzbCollectorThread (NNTPMatchedArticle nma, AtomicCounter atom, NNTPConnection nn, String ma) {
 		//setStart(st);
 		//setEnd(en);
 		//setIncrement(in);
 		setAtomicCounter(atom);
 		setNNTP(nn);
 		setMatch(ma);
+		setNNTPMatchedArticle(nma);
 	}
 	
 //	public void setStart(int i) { start = i; }
@@ -33,6 +35,7 @@ public class NzbCollectorThread implements Runnable {
 //	public void setIncrement(int i) { increment = i; }
 	public void setAtomicCounter(AtomicCounter atom) { ac = atom; }
 	public void setNNTP(NNTPConnection i) { nntp = i; }
+	public void setNNTPMatchedArticle(NNTPMatchedArticle nma) { callback = nma; }
 	public void setMatch(String m) { 
 		if (m!=null) {
 			match = m; 
@@ -54,62 +57,24 @@ public class NzbCollectorThread implements Runnable {
 				try {
 					
 					nntp.headArticle(is);
-					
-					String subject = nntp.getArticleSubject();
-					
+										
 					//System.out.println ("" + i + ": Subject: " + subject + "match: " + match);
 					
-					if (subject.matches(match)) {
-						long currenttime = System.currentTimeMillis();
-						long currentarticle = i;
+					if (nntp.getArticleSubject().matches(match)) {
+					//	long currenttime = System.currentTimeMillis();
+					//	long currentarticle = i;
 						
 						// in theory there are increment number of concurrent threads, they should all be doing about the same a/s
-						Double aps = 1.0*(currentarticle - startarticle) / (currenttime - starttime)*1.0;
-						//Double remain = (end - i) / aps ;
-						//Date d = new Date (remain.longValue() + currenttime);
-						System.out.println("" + i + " : " +  subject + " : " + nntp.getArticleName()  + " : " + aps );
+					//	Double aps = 1.0*(currentarticle - startarticle) / (currenttime - starttime)*1.0;
 						
-					//	Thread decodeThread = new Thread (new Runnable() {
-					//		public void run() 
-					//		{
-						/*
-								try {
-									// NNTPyDecoder ydec = new NNTPyDecoder(nntp.getArticleName());
-									// ydec.decodeParts();
-									
-									YEncDecoder decoder = new YEncDecoder();
-									nntp.bodyArticle(nntp.getArticleName());
-									decoder.setInputStream(nntp);
-									OutputStream out = new BufferedOutputStream(new FileOutputStream(decoder.getFileName()));
-									decoder.setOutputStream(out);
-									decoder.decode();
-									System.out.println("decoded file \"" +
-													 decoder.getFileName() +
-													 "\" [" + decoder.getSize() + " bytes]");
-									
-								} catch (IOException e) {
-									System.out.println("Couldn't connect to news server.");
-								} catch (NNTPNoSuchArticleException e) {
-									// don't want to know if the article isn't there.
-									System.out.println("Couldn't find article: " + e.getMessage());
-								} catch (ar.com.ktulu.yenc.YEncException e) {
-									;
-									System.out.println("Couldn't decode article: " + e.getMessage());
-								} 
-						 */
-					//		}
-					//	});
-					//	decodeThread.start();
+						callback.processArticle(nntp);
 						
-						//	NNTPyDecoder ydec = new NNTPyDecoder(nntp.getArticleName());
-						//	ydec.decodeParts();
 						
-						starttime =currenttime;
-						startarticle = currentarticle;
+					//	starttime =currenttime;
+					//	startarticle = currentarticle;
 						
 					}
 				} catch (NNTPNoSuchArticleException e) {
-					;
 					// don't want to know if the article isn't there.
 					System.out.println("Couldn't find article: " + e.getMessage());
 					// e.printStackTrace();

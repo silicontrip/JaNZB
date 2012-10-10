@@ -78,13 +78,15 @@ public class NzbCollector {
 							
 							long starttime = System.currentTimeMillis();
 							
+							AtomicCounter ac = new AtomicCounter(start,end);
+							
 							for (int i=0; i<threads; i++) {
 								
 								NNTPConnection nntpthread = new NNTPConnection(host,port);
 								//nntpthread.enableDebug();
 								nntpthread.connect();
 								nntpthread.setGroup(group);
-								allThreads[i] = new Thread (new NzbCollectorThread(start+i, end,threads,nntpthread,".*nzb.*"));
+								allThreads[i] = new Thread (new NzbCollectorThread(ac,nntpthread,".*nzb.*"));
 								allThreads[i].start();
 							}
 							

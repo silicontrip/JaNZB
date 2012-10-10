@@ -1,6 +1,5 @@
 import java.io.*;
 
-import java.util.HashMap;
 import java.util.Date;
 import ar.com.ktulu.yenc.*;
 
@@ -14,17 +13,25 @@ public class NzbCollectorThread implements Runnable {
 	private NNTPConnection nntp;
 	private String match;
 	
-	public NzbCollectorThread (int st, int en, int in, NNTPConnection nn, String ma) {
-		setStart(st);
-		setEnd(en);
-		setIncrement(in);
+	private AtomicCounter ac;
+	
+	public NzbCollectorThread (AtomicCounter atom, NNTPConnection nn) {
+		this(atom,nn,".*");
+	}
+	
+	public NzbCollectorThread (AtomicCounter atom, NNTPConnection nn, String ma) {
+		//setStart(st);
+		//setEnd(en);
+		//setIncrement(in);
+		setAtomicCounter(atom);
 		setNNTP(nn);
 		setMatch(ma);
 	}
 	
-	public void setStart(int i) { start = i; }
-	public void setEnd(int i) { end = i; }
-	public void setIncrement(int i) { increment = i; }
+//	public void setStart(int i) { start = i; }
+//	public void setEnd(int i) { end = i; }
+//	public void setIncrement(int i) { increment = i; }
+	public void setAtomicCounter(AtomicCounter atom) { ac = atom; }
 	public void setNNTP(NNTPConnection i) { nntp = i; }
 	public void setMatch(String m) { 
 		if (m!=null) {
@@ -38,30 +45,29 @@ public class NzbCollectorThread implements Runnable {
 		
 		try{
 			long starttime = System.currentTimeMillis();
-			int startarticle = start;
-			for (int i=start; i<end; i+=increment) {
+			long startarticle = start;
+			long i;
+			while ((i = ac.getInstance().getNext() ) != -1) {
 				
-				String is = Integer.toString(i);
+				String is = Long.toString(i);
 				
 				try {
-					HashMap<String,String> articleHeader;
 					
 					nntp.headArticle(is);
-					//articleHeader = nntp.getHeader(is);
 					
 					String subject = nntp.getArticleSubject();
 					
-					//	System.out.println ("Subject: " + subject + "match: " + match);
+					//System.out.println ("" + i + ": Subject: " + subject + "match: " + match);
 					
 					if (subject.matches(match)) {
 						long currenttime = System.currentTimeMillis();
-						int currentarticle = i;
+						long currentarticle = i;
 						
 						// in theory there are increment number of concurrent threads, they should all be doing about the same a/s
 						Double aps = 1.0*(currentarticle - startarticle) / (currenttime - starttime)*1.0;
-						Double remain = (end - i) / aps ;
-						Date d = new Date (remain.longValue() + currenttime);
-						System.out.println("" + i + " : " +  subject + " : " + nntp.getArticleName()  + " : " +  d.toString() );
+						//Double remain = (end - i) / aps ;
+						//Date d = new Date (remain.longValue() + currenttime);
+						System.out.println("" + i + " : " +  subject + " : " + nntp.getArticleName()  + " : " + aps );
 						
 					//	Thread decodeThread = new Thread (new Runnable() {
 					//		public void run() 
@@ -106,7 +112,7 @@ public class NzbCollectorThread implements Runnable {
 					;
 					// don't want to know if the article isn't there.
 					System.out.println("Couldn't find article: " + e.getMessage());
-					e.printStackTrace();
+					// e.printStackTrace();
 				} 
 			}
 		} catch (IOException e) {

@@ -13,16 +13,11 @@ public class NNTPyDecoder {
 	public NNTPyDecoder (NNTPConnection n) throws IOException {
 		decoder = new YEncDecoder();
 		setNNTPConnection(n);
-		//Properties fileProperties = new Properties();
 		
-		
-	//	FileInputStream fis = new FileInputStream(new File("nntp.properties"));
-	//	fileProperties.load (fis);
-	//	fis.close();
-		
-	//	nntpPort = new Integer(fileProperties.getProperty("NewsServerPort"));
-	//	nntpHost = fileProperties.getProperty("NewsServerHost");
-		
+		if (n.getArticleMessageID() != null) {
+			setArticle(n.getArticleMessageID());
+		}
+				
 	}
 	
 	public NNTPyDecoder (NNTPConnection n, String[] a) throws IOException, YEncException, NNTPNoSuchArticleException, NNTPConnectionResponseException

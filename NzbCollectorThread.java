@@ -50,7 +50,7 @@ public class NzbCollectorThread implements Runnable {
 			long starttime = System.currentTimeMillis();
 			long startarticle = start;
 			long i;
-			while ((i = ac.getInstance().getNext() ) != -1) {
+			while ((i = ac.getNext() ) != -1) {
 				
 				String is = Long.toString(i);
 				

@@ -57,6 +57,8 @@ public class NNTPConnection extends InputStream {
 		buffer2 = new byte[BUFFER_SIZE];
 		
 		network = new TCPConnection();
+		
+		articleHeader = new HashMap<String, String>();
 	}
 	
 	/** 

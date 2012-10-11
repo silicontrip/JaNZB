@@ -730,7 +730,6 @@ public class NNTPConnection extends InputStream {
 	 * @return the subject of the current article.
 	 */
 	
-	public String getArticleSubject() { return this.articleHeader.get("Subject"); }
 	
 	public String getArticleDateAsString () { return this.articleHeader.get("Date"); }
 	public Date getArticleDate() { 
@@ -750,6 +749,7 @@ public class NNTPConnection extends InputStream {
 		}
 		return null;
 	}
+	public String getArticleSubject() { return this.articleHeader.get("Subject"); }
 	public String getArticleLines() { return this.articleHeader.get("Lines"); }
 	public String getArticleBytes() { return this.articleHeader.get("Bytes"); }
 	public String getArticlePath() { return this.articleHeader.get("Path"); }
@@ -784,7 +784,6 @@ public class NNTPConnection extends InputStream {
 
 		// this.close();
 		
-		this.articleName = articleName; 
 		
 		setEndCommandDot();
 		sendCommand("ARTICLE " + articleName + "\r\n");
@@ -793,6 +792,7 @@ public class NNTPConnection extends InputStream {
 		} catch (NNTPUnexpectedResponseException e) {
 			throw new NNTPNoSuchArticleException(e.getMessage(),articleName);
 		}
+		this.articleName = articleName; 
 
 		start = System.currentTimeMillis();
 		split = start;
@@ -814,7 +814,6 @@ public class NNTPConnection extends InputStream {
 		
 	//	this.close();
 		
-		this.articleName = articleName; 
 		
 		setEndCommandDot();
 		sendCommand("BODY " + articleName + "\r\n");
@@ -823,6 +822,7 @@ public class NNTPConnection extends InputStream {
 		} catch (NNTPUnexpectedResponseException e) {
 			throw new NNTPNoSuchArticleException(e.getMessage(),articleName);
 		}
+		this.articleName = articleName; 
 
 		start = System.currentTimeMillis();
 		split = start;
@@ -850,6 +850,7 @@ public class NNTPConnection extends InputStream {
 		String r ;
 		String q=null;
 		
+		
 		// the dot end of data marker is only used if the correct response is received.
 		setEndCommandDot();
 		sendCommand("HEAD " + article + "\r\n");
@@ -860,7 +861,8 @@ public class NNTPConnection extends InputStream {
 			throw new NNTPNoSuchArticleException(article + ": " + e.getMessage(),article);
 		}
 		
-		
+		this.articleName = article; 
+
 		while (".".compareTo(r) != 0 ) {
 			r = readLine();
 			
@@ -872,7 +874,6 @@ public class NNTPConnection extends InputStream {
 			
 		}
 		
-		this.articleName = getArticleMessageID();
 	}
 	
 	/**

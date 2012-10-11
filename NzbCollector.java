@@ -51,10 +51,12 @@ public class NzbCollector  {
 							Integer threads = new Integer(fileProperties.getProperty("Threads"));
 							Integer start = new Integer(fileProperties.getProperty(group + ".currentArticle"));
 							
+							NNTPMatchedArticle nntpma = new printArticle();
 							
 							if (args.length ==2 ) {
 								start = new Integer(args[0]);
 								end = new Integer(args[1]);
+								nntpma = new decodeArticle();
 							}
 							
 							System.out.println("Group: " + group + " " + start +"-"+end);
@@ -73,7 +75,7 @@ public class NzbCollector  {
 								//nntpthread.enableDebug();
 								nntpthread.connect();
 								nntpthread.setGroup(group);
-								allThreads[i] = new Thread (new NzbCollectorThread(new printArticle(),ac,nntpthread,".*nzb.*"));
+								allThreads[i] = new Thread (new NzbCollectorThread(nntpma ,ac,nntpthread,".*nzb.*"));
 								allThreads[i].start();
 							}
 							

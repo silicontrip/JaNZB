@@ -51,18 +51,37 @@ public class NNTPindex {
 				
 				int found = huntSubject(articleStart,articleEnd,args[2],nntp);
 				
-				/*
+				// hunt backwards and forwards until the nzb file is found.
+				
+				AtomicCounter forward = new AtomicCounter(found, found + 10000, 1);
+				AtomicCounter backward = new AtomicCounter(found-1, found - 10000, -1);
+				
+				NNTPMatchedArticle matchedArticle = new decodeArticle();
+				
 				Thread allThreads[];
 				allThreads = new Thread[threads];
 				
-				for (int i=0; i<threads; i++) {
+				String match = new String(args[2]).concat(".*\\.nzb.*");
+				
+				System.out.println ("Searching for: " + match);
+				
+				for (int i=0; i<threads; i+=2) {
 					
 					NNTPConnection nntpthread = new NNTPConnection(host,port);
-					//nntpthread.enableDebug();
+					// nntpthread.enableDebug();
 					nntpthread.connect();
 					nntpthread.setGroup(group);
-					allThreads[i] = new Thread (new NzbCollectorThread(articleStart+i*100, articleEnd,threads*100,nntpthread,".*"));
+					allThreads[i] = new Thread (new NzbCollectorThread(matchedArticle,forward,nntpthread,match));
 					allThreads[i].start();
+					
+					nntpthread = new NNTPConnection(host,port);
+					// nntpthread.enableDebug();
+					nntpthread.connect();
+					nntpthread.setGroup(group);
+					allThreads[i+1] = new Thread (new NzbCollectorThread(matchedArticle,backward,nntpthread,match));
+					allThreads[i+1].start();
+					
+					
 				}
 				
 				
@@ -73,7 +92,7 @@ public class NNTPindex {
 						System.out.println("What interrupted us? " + e.getMessage());
 					}
 				}
-				*/
+				
 				
 				
 			} catch (NumberFormatException e) {

@@ -14,6 +14,7 @@ import java.text.*;
 public class NNTPConnection extends InputStream {
 	
 	transient private TCPConnection network;
+	private boolean connected=false;
 	private static final byte[] dot = {0xd, 0xa, 0x2e, 0xd, 0xa};
 	private static final byte[] newline = {0xd, 0xa};
 	
@@ -159,6 +160,7 @@ public class NNTPConnection extends InputStream {
 		} catch (NNTPUnexpectedResponseException e) {
 			throw new NNTPConnectionResponseException(e.getMessage());
 		}
+		connected = true;
 		internal_reset();
 	}
 	
@@ -172,13 +174,16 @@ public class NNTPConnection extends InputStream {
 	
 	public void disconnect() throws IOException, NNTPUnexpectedResponseException {
 		
-		this.setEndCommand(newline);
-		sendCommand("QUIT\r\n");
+		if (connected) {
+			this.setEndCommand(newline);
+			sendCommand("QUIT\r\n");
 		
 		// check for success, but what are we going to do if it fails? close connection?
-		checkResponse("205");
+			checkResponse("205");
 		
-		network.disconnect();
+			network.disconnect();
+			connected = false;
+		}
 	}
 	
 	/** 
@@ -418,6 +423,10 @@ public class NNTPConnection extends InputStream {
 	
 	protected String checkResponse (String result) throws IOException, NNTPUnexpectedResponseException {
 		String s = this.readLine();
+		
+		if (s.startsWith("400")) {
+			connected = false;
+		}
 		
 		if (!s.startsWith(result)) {
 			throw new NNTPUnexpectedResponseException(s);
@@ -950,7 +959,7 @@ public class NNTPConnection extends InputStream {
      * @return Number of bytes, which have been copied.
      * @throws IOException An I/O error occurred.
      */
-    public static long copy(InputStream pInputStream,
+    protected static long copy(InputStream pInputStream,
 							OutputStream pOutputStream, boolean pClose)
 	throws IOException {
         return copy(pInputStream, pOutputStream, pClose,
@@ -974,7 +983,7 @@ public class NNTPConnection extends InputStream {
      * @return Number of bytes, which have been copied.
      * @throws IOException An I/O error occurred.
      */
-    public static long copy(InputStream pIn,
+    protected static long copy(InputStream pIn,
 							OutputStream pOut, boolean pClose,
 							byte[] pBuffer)
     throws IOException {

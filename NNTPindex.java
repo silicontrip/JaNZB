@@ -12,8 +12,14 @@ public class NNTPindex {
 		
 		try {
 			
-			Properties fileProperties = new Properties();
+			// check that all arguments are present...
 			
+			String group = args[0];
+			String startDateArgs = args[1];
+			String endDateArgs = args[2];
+			String articleMatchArgs = args[3];
+			
+			Properties fileProperties = new Properties();
 			
 			FileInputStream fis = new FileInputStream(new File("nntp.properties"));
 			fileProperties.load (fis);
@@ -24,15 +30,14 @@ public class NNTPindex {
 			nntp = new NNTPConnection(host,port);
 			
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZ");
-			Date startDate = sdf.parse(args[0] + " 00:00:00 GMT",new ParsePosition(0));
-			Date endDate = sdf.parse(args[1] + " 00:00:00 GMT",new ParsePosition(0));
+			Date startDate = sdf.parse(startDateArgs + " 00:00:00 GMT",new ParsePosition(0));
+			Date endDate = sdf.parse(endDateArgs + " 00:00:00 GMT",new ParsePosition(0));
 
-			
 			//nntp.enableDebug();
 			try {
 				nntp.connect();
 				
-				String group = fileProperties.getProperty("NewsServerGroup");
+				// fileProperties.getProperty("NewsServerGroup");
 				Integer threads = new Integer(fileProperties.getProperty("Threads"));
 
 				nntp.setGroup(group);
@@ -41,29 +46,50 @@ public class NNTPindex {
 				Integer end = nntp.getGroupEnd();
 
 				System.out.println("Group: " + group + " " + start +"-"+end);
-
 				
-				int articleStart = huntDate(start,end,startDate,nntp);
-				int articleEnd = huntDate(start,end,endDate,nntp);
+				Integer articleStart, articleEnd;
+				if (startDate == null)
+				{
+					try {
+						articleStart= new Integer(startDateArgs);
+					}
+					catch (NumberFormatException e) {
+						articleStart = start;
+					}
+				} else {
+					articleStart = huntDate(start,end,startDate,nntp);
+				}
+					
+				if(endDate == null) {
+					try {
+						articleEnd= new Integer(endDateArgs);
+					}
+					catch (NumberFormatException e) {
+						articleEnd = end;
+					}
+				} else {
+				 articleEnd = huntDate(start,end,endDate,nntp);
+				}
+				
 				int articleNumber = articleEnd-articleStart;
 				System.out.println("Range " + articleStart + "-" + articleEnd);
 				System.out.println("Articles " + articleNumber);
 				
-				int found = huntSubject(articleStart,articleEnd,args[2],nntp);
+				int found = huntSubject(articleStart,articleEnd,articleMatchArgs,nntp);
 				
 				// hunt backwards and forwards until the nzb file is found.
 				
-				AtomicCounter forward = new AtomicCounter(found, found + 10000, 1);
-				AtomicCounter backward = new AtomicCounter(found-1, found - 10000, -1);
+				AtomicCounter forward = new AtomicCounter(found, end, 1);
+				AtomicCounter backward = new AtomicCounter(found-1, start, -1);
 				
-				NNTPMatchedArticle matchedArticle = new decodeArticle();
+				NNTPMatchedArticle matchedArticle = new decodeNZB();
 				
 				Thread allThreads[];
 				allThreads = new Thread[threads];
 				
-				String match = new String(args[2]).concat(".*\\.nzb.*");
+				//String match = new String(args[2]).concat("nzb.*");
 				
-				System.out.println ("Searching for: " + match);
+			//	System.out.println ("Searching for: " + match);
 				
 				for (int i=0; i<threads; i+=2) {
 					
@@ -71,14 +97,14 @@ public class NNTPindex {
 					// nntpthread.enableDebug();
 					nntpthread.connect();
 					nntpthread.setGroup(group);
-					allThreads[i] = new Thread (new NzbCollectorThread(matchedArticle,forward,nntpthread,match));
+					allThreads[i] = new Thread (new NzbCollectorThread(matchedArticle,forward,nntpthread,articleMatchArgs));
 					allThreads[i].start();
 					
 					nntpthread = new NNTPConnection(host,port);
 					// nntpthread.enableDebug();
 					nntpthread.connect();
 					nntpthread.setGroup(group);
-					allThreads[i+1] = new Thread (new NzbCollectorThread(matchedArticle,backward,nntpthread,match));
+					allThreads[i+1] = new Thread (new NzbCollectorThread(matchedArticle,backward,nntpthread,articleMatchArgs));
 					allThreads[i+1].start();
 					
 					

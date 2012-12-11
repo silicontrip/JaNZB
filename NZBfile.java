@@ -39,7 +39,7 @@ public class NZBfile implements java.io.Serializable {
 		if (nzbdoc.getFirstChild().getNodeName().equals(ROOT_NODE_NAME)) {
 			
 			// 			System.out.println("NZB -> " + nzbdoc.getFirstChild().getNodeName());
-			nzbFiles = nzbdoc.getElementsByTagName("file");
+			nzbFiles = nzbdoc.getElementsByTagName(FILE_NODE_NAME);
 			
 		} else {
 			throw new SAXException("not NZB file");
@@ -111,7 +111,30 @@ public class NZBfile implements java.io.Serializable {
 		
 	}
 	
+	public NodeList getAllSegments()
+	{
+		return nzbdoc.getElementsByTagName(SEGMENT_NODE_NAME);
+	}
 	
+	public int getNumberSegments() 
+	{
+		return getAllSegments().getLength();
+	}
+	
+	public ArrayList<String> getAllSegmentsAsStrings()
+	{
+		NodeList nl = getAllSegments();
+		
+		ArrayList<String> segments = new ArrayList<String>();
+		
+		for (int i =0; i < getNumberSegments(); i++) 
+		{
+			Node n = nl.item(i);
+			segments.add(n.getFirstChild().getNodeValue());
+		}
+		return segments;
+	}
+		
 	public void setFilter(String filter) {
 		
 		int m=0;

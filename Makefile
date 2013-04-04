@@ -1,6 +1,6 @@
 
-all: janzb.jar classes
-	jar -cf janzb.jar *.class ar
+all: classes
+	jar -cf janzb.jar *.class 
 
 classes: janzb.class  NNTPindex.class NzbMake.class  NzbCollector.class  NNTPget.class NzbCheck.class \
 	NzbCollectorThread.class NzbCheckThread.class NNTPyDecoder.class \
@@ -9,7 +9,7 @@ classes: janzb.class  NNTPindex.class NzbMake.class  NzbCollector.class  NNTPget
 	NNTPConnectionResponseException.class NNTPGroupResponseException.class NNTPNoSuchArticleException.class NNTPNoSuchGroupException.class NNTPUnexpectedResponseException.class
 
 %.class: %.java
-	javac  -Xlint:deprecation -Xlint:unchecked -target 1.5 $<
+	javac  -Xlint:deprecation -Xlint:unchecked -cp .:jyenc-0.5.jar  -target 1.5 $<
 
 clean:
 	rm *.class

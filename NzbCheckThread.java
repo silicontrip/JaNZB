@@ -5,18 +5,12 @@ import java.util.ArrayList;
 
 public class NzbCheckThread implements Runnable {
 	
-	
 	private NNTPConnection nntp;
 	private NNTPMatchedArticle callback;
 	private AtomicCounter ac;
 	private ArrayList<String> articleList;
 	
-	
-	
 	public NzbCheckThread (NNTPMatchedArticle nma, AtomicCounter atom, NNTPConnection nn, ArrayList<String> al) {
-		//setStart(st);
-		//setEnd(en);
-		//setIncrement(in);
 		setAtomicCounter(atom);
 		setNNTP(nn);
 		setArticleList(al);
@@ -35,34 +29,13 @@ public class NzbCheckThread implements Runnable {
 			long i;
 			while ((i = ac.getNext() ) != -1) {
 				
-				
 				String is = articleList.get((int)i);
-				
-				// String is = Long.toString(i);
-				
+								
 				try {
-					
 					nntp.headArticle("<" + is + ">" );
-										
-					//System.out.println ("" + i + ": Subject: " + subject + "match: " + match);
-					
-					//	long currenttime = System.currentTimeMillis();
-					//	long currentarticle = i;
-						
-						// in theory there are increment number of concurrent threads, they should all be doing about the same a/s
-					//	Double aps = 1.0*(currentarticle - startarticle) / (currenttime - starttime)*1.0;
-						
-						callback.processArticle(nntp);
-						
-						
-					//	starttime =currenttime;
-					//	startarticle = currentarticle;
-						
-					
+					callback.processArticle(nntp);
 				} catch (NNTPNoSuchArticleException e) {
-					// don't want to know if the article isn't there.
 					System.out.println("Couldn't find article: " + e.getMessage());
-					// e.printStackTrace();
 				} 
 			}
 		} catch (IOException e) {
@@ -70,10 +43,9 @@ public class NzbCheckThread implements Runnable {
 		}
 		try {
 			nntp.disconnect();
-		} catch (IOException e) {
+		} catch (Exception e) {
+			// like we really care if there is a problem disconnecting.
 			System.out.println("Problem disconnecting from NNTP server: " + e.getMessage());
-		} catch (NNTPUnexpectedResponseException e) {
-			System.out.println("Problem disconnecting from NNTP server: " + e.getMessage());
-		}
+		} 
 	}
 }

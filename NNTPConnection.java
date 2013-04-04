@@ -38,9 +38,9 @@ public class NNTPConnection extends InputStream {
 	private byte[] buffer2;
 	
 	String groupName;
-	Integer groupStart;
-	Integer groupEnd;
-	Integer groupLength;
+	Long groupStart;
+	Long groupEnd;
+	Long groupLength;
 	
 	HashMap<String, String> articleHeader;
 	
@@ -646,9 +646,9 @@ public class NNTPConnection extends InputStream {
 				throw new NNTPGroupResponseException(s);	
 			}
 			
-			groupLength=new Integer(param[1]);
-			groupStart=new Integer(param[2]);
-			groupEnd=new Integer(param[3]);
+			groupLength=new Long(param[1]);
+			groupStart=new Long(param[2]);
+			groupEnd=new Long(param[3]);
 			groupName=param[4];
 			
 		} catch (NNTPUnexpectedResponseException e) {
@@ -666,7 +666,7 @@ public class NNTPConnection extends InputStream {
 	 * @see #setGroup(String)
 	 */
 	
-	public Integer getGroupLength() {return groupLength;}
+	public Long getGroupLength() {return groupLength;}
 	/**
 	 * returns the number of the first article in the current group.
 	 *
@@ -674,7 +674,7 @@ public class NNTPConnection extends InputStream {
 	 * @see #setGroup(String)
 	 */
 	
-	public Integer getGroupStart() {return groupStart;}
+	public Long getGroupStart() {return groupStart;}
 	/**
 	 * returns the number of the last article in the current group.
 	 *
@@ -682,7 +682,7 @@ public class NNTPConnection extends InputStream {
 	 * @see #setGroup(String)
 	 */
 	
-	public Integer getGroupEnd() {return groupEnd;}
+	public Long getGroupEnd() {return groupEnd;}
 	/**
 	 * returns the name of the current group.
 	 *

@@ -50,7 +50,7 @@ public class NzbCollectorThread implements Runnable {
 			do {
 				
 				try {
-					System.out.println("Thread connecting to NNTP server.");
+					// System.out.println("Thread connecting to NNTP server.");
 
 					nntp.connect();
 					nntp.setGroup(group);

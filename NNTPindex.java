@@ -97,14 +97,14 @@ public class NNTPindex {
 					// nntpthread.enableDebug();
 					nntpthread.connect();
 					nntpthread.setGroup(group);
-					allThreads[i] = new Thread (new NzbCollectorThread(matchedArticle,forward,nntpthread,articleMatchArgs));
+					allThreads[i] = new Thread (new NzbCollectorThread(matchedArticle,forward,nntpthread,group,articleMatchArgs));
 					allThreads[i].start();
 					
 					nntpthread = new NNTPConnection(host,port);
 					// nntpthread.enableDebug();
 					nntpthread.connect();
 					nntpthread.setGroup(group);
-					allThreads[i+1] = new Thread (new NzbCollectorThread(matchedArticle,backward,nntpthread,articleMatchArgs));
+					allThreads[i+1] = new Thread (new NzbCollectorThread(matchedArticle,backward,nntpthread,group,articleMatchArgs));
 					allThreads[i+1].start();
 					
 					

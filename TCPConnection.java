@@ -146,6 +146,7 @@ public class TCPConnection {
 		if (this.debug)
 			System.out.print(">> " + (new String(comm)));
 		
+		
 		out.write(comm);
 		out.flush();
 	}

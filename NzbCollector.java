@@ -25,37 +25,32 @@ public class NzbCollector  {
 			
 			for (String group : fileProperties.getProperty("Groups").split(",")) {
 				
-				
-				
 				try {
 					nntp = new NNTPConnection(host,port);
 					nntp.connect();
 					
 					
 					nntp.setGroup(group);
-					Integer end = nntp.getGroupEnd();
+					Long end = nntp.getGroupEnd();
 					
 					try {
 						nntp.disconnect();
-					} catch (IOException e) {
+					} catch (Exception e) {
 						System.out.println("Problem disconnecting from NNTP server: " + e.getMessage());
-					} catch (NNTPUnexpectedResponseException e) {
-						System.out.println("Problem disconnecting from NNTP server: " + e.getMessage());
-					}
-					
+					} 
 					
 					
 					if (fileProperties.getProperty(group + ".currentArticle") != null)
 					{
 						try {
 							Integer threads = new Integer(fileProperties.getProperty("Threads"));
-							Integer start = new Integer(fileProperties.getProperty(group + ".currentArticle"));
+							Long start = new Long(fileProperties.getProperty(group + ".currentArticle"));
 							
 							NNTPMatchedArticle nntpma = new printArticle();
 							
 							if (args.length ==2 ) {
-								start = new Integer(args[0]);
-								end = new Integer(args[1]);
+								start = new Long(args[0]);
+								end = new Long(args[1]);
 								nntpma = new decodeArticle();
 							}
 							
@@ -73,9 +68,10 @@ public class NzbCollector  {
 								
 								NNTPConnection nntpthread = new NNTPConnection(host,port);
 								//nntpthread.enableDebug();
-								nntpthread.connect();
-								nntpthread.setGroup(group);
-								allThreads[i] = new Thread (new NzbCollectorThread(nntpma ,ac,nntpthread,".*nzb.*"));
+								// going to do this inside the collector thread
+								// nntpthread.connect();
+								// nntpthread.setGroup(group);
+								allThreads[i] = new Thread (new NzbCollectorThread(nntpma ,ac,nntpthread,group,".*nzb.*"));
 								allThreads[i].start();
 							}
 							

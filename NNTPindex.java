@@ -42,16 +42,16 @@ public class NNTPindex {
 
 				nntp.setGroup(group);
 				
-				Integer start = nntp.getGroupStart();
-				Integer end = nntp.getGroupEnd();
+				Long start = nntp.getGroupStart();
+				Long end = nntp.getGroupEnd();
 
 				System.out.println("Group: " + group + " " + start +"-"+end);
 				
-				Integer articleStart, articleEnd;
+				Long articleStart, articleEnd;
 				if (startDate == null)
 				{
 					try {
-						articleStart= new Integer(startDateArgs);
+						articleStart= new Long(startDateArgs);
 					}
 					catch (NumberFormatException e) {
 						articleStart = start;
@@ -62,7 +62,7 @@ public class NNTPindex {
 					
 				if(endDate == null) {
 					try {
-						articleEnd= new Integer(endDateArgs);
+						articleEnd= new Long(endDateArgs);
 					}
 					catch (NumberFormatException e) {
 						articleEnd = end;
@@ -71,11 +71,11 @@ public class NNTPindex {
 				 articleEnd = huntDate(start,end,endDate,nntp);
 				}
 				
-				int articleNumber = articleEnd-articleStart;
+				Long articleNumber = articleEnd-articleStart;
 				System.out.println("Range " + articleStart + "-" + articleEnd);
 				System.out.println("Articles " + articleNumber);
 				
-				int found = huntSubject(articleStart,articleEnd,articleMatchArgs,nntp);
+				Long found = huntSubject(articleStart,articleEnd,articleMatchArgs,nntp);
 				
 				// hunt backwards and forwards until the nzb file is found.
 				
@@ -149,9 +149,9 @@ public class NNTPindex {
 		
 	}
 	
-	protected static int huntDate (int start, int end, Date searchDate, NNTPConnection nntp) throws IOException {
+	protected static Long huntDate (Long start, Long end, Date searchDate, NNTPConnection nntp) throws IOException {
 		
-		Integer get;
+		Long get;
 		do {
 			
 			// What's the difference
@@ -176,20 +176,20 @@ public class NNTPindex {
 		return start;
 	}		
 	
-	protected static int huntSubject (int articleStart, int articleEnd, String match, NNTPConnection nntp) throws IOException
+	protected static Long huntSubject (Long articleStart, Long articleEnd, String match, NNTPConnection nntp) throws IOException
 	{
-		int articleNumber = articleEnd-articleStart;
+		Long articleNumber = articleEnd-articleStart;
 		
-		for (int i=0; 1<<i < articleNumber; i ++)
+		for (Long i=0L; 1<<i < articleNumber; i ++)
 		{
 			
 			
-			int step = articleNumber / (1 << i);
+			Long step = articleNumber / (1 << i);
 		//	System.out.println ("search: " + (1<<i) + " : " + step); 
 			
-			for (int j=0; j * step < articleNumber; j++) {
+			for (Long j=0L; j * step < articleNumber; j++) {
 				
-				int get = (j * step) + (step / 2) + articleStart;
+				Long get = (j * step) + (step / 2) + articleStart;
 				
 				try {
 					nntp.headArticle(""+get);
@@ -209,7 +209,7 @@ public class NNTPindex {
 			
 		}
 	
-		return -1;
+		return -1L;
 	}
 	
 	

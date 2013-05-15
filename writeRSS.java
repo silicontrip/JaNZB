@@ -32,15 +32,15 @@ public class writeRSS implements NNTPMatchedArticle {
             //System.out.println.getArticleSubject().replace("&", "&amp;").replace("<", "&lt;") );
 
             //  System.out.println("<content>");
-            out.write("Bytes: "+ n.getArticleBytes() );
-            out.write("Lines: "+ n.getArticleLines() );
-            out.write("Path: "+ n.getArticlePath().replace("&", "&amp;").replace("<", "&lt;") );
-            out.write("From: "+ n.getArticleFrom().replace("&", "&amp;").replace("<", "&lt;") );
-            out.write("Newsgroups: "+ n.getArticleNewsgroups());
-            out.write("Message-ID: "+ n.getArticleMessageID().replace("&", "&amp;").replace("<", "&lt;") );
-            out.write("Organization: "+ n.getArticleOrganization());
-            out.write("NNTP-Posting-Host: "+ n.getArticleNNTPPostingHost());
-            out.write("Xref: "+ n.getArticleXref());
+            out.write("Bytes: "+ n.getArticleBytes() + " ");
+            out.write("Lines: "+ n.getArticleLines()+ " " );
+            out.write("Path: "+ n.getArticlePath().replace("&", "&amp;").replace("<", "&lt;") + " ");
+            out.write("From: "+ n.getArticleFrom().replace("&", "&amp;").replace("<", "&lt;")+ " " );
+            out.write("Newsgroups: "+ n.getArticleNewsgroups()+ " ");
+            out.write("Message-ID: "+ n.getArticleMessageID().replace("&", "&amp;").replace("<", "&lt;")+ " " );
+            out.write("Organization: "+ n.getArticleOrganization()+ " ");
+            out.write("NNTP-Posting-Host: "+ n.getArticleNNTPPostingHost()+ " ");
+            out.write("Xref: "+ n.getArticleXref()+ " ");
             out.write("</description>") ;
 
             //System.out.println("</content>");

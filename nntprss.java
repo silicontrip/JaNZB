@@ -41,7 +41,7 @@ public class nntprss {
 
                     nntp.headArticle(artID);
 
-                    NNTPMatchedArticle nntpma = new printRSS();
+                    NNTPMatchedArticle nntpma = new writeRSS();
 
                     nntpma.processArticle(nntp);
 

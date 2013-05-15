@@ -26,10 +26,10 @@ public class NzbCollector  {
 				
 				try {
 					nntp = new NNTPConnection(host,port);
-					nntp.connect();
-					
-					
-					nntp.setGroup(group);
+                    nntp.connect();
+
+
+                    nntp.setGroup(group);
 					Long end = nntp.getGroupEnd();
 					
 					try {

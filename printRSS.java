@@ -9,8 +9,8 @@ public class printRSS implements NNTPMatchedArticle {
     public  void processArticle (NNTPConnection n) {
 
         System.out.println("<item>");
-        System.out.println("<title>" + n.getArticleName() .replace("&", "&amp;").replace("<", "&lt;") +"</title>");
-        System.out.println("<link>http://silicontrip.net/~mark/nzb.php/" + n.getArticleSubject() .replace("&", "&amp;").replace("<", "&lt;") +"</link>");
+        System.out.println("<title>" + n.getArticleSubject() .replace("&", "&amp;").replace("<", "&lt;") +"</title>");
+        System.out.println("<link>http://silicontrip.net/~mark/nzb.php/" + n.getArticleMessageID() .replace("&", "&amp;").replace("<", "&lt;") +"</link>");
         System.out.println("<pubDate>"+ n.getArticleDateAsString() +"</pubDate>");
         System.out.println("<description>"+ n.getArticleSubject().replace("&", "&amp;").replace("<", "&lt;") );
 

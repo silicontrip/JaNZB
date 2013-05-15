@@ -51,7 +51,7 @@ public class nntprss {
                 nntp.close();
 
 
-            }    catch (Exception e) {
+            } catch (Exception e) {
 
                 System.out.println("Unexpected error: (actually it was expected but I'm not sure what to do with it)");
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -59,13 +59,6 @@ public class nntprss {
             }
 
 
-        } catch (NNTPUnexpectedResponseException e) {
-
-            System.out.println("Server did not return expected response: " + e.getMessage());
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (NNTPConnectionResponseException e) {
-            System.out.println("Could not connect to server: " + e.getMessage());
-           e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } catch (UnknownHostException e) {
             System.out.println("Could not connect to server: " + e.getMessage());
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -75,10 +68,6 @@ public class nntprss {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } catch (IOException e) {
             System.out.println("Could not read from config file: " + e.getMessage());
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (NNTPNoSuchArticleException e) {
-
-            System.out.println("Could not read article: " + e.getMessage());
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }

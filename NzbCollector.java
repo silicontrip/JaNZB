@@ -45,9 +45,11 @@ public class NzbCollector  {
 							Integer threads = new Integer(fileProperties.getProperty("Threads"));
 							Long start = new Long(fileProperties.getProperty(group + ".currentArticle"));
 							
-							NNTPMatchedArticle nntpma = new printArticle();
-							
-							if (args.length ==2 ) {
+							//NNTPMatchedArticle nntpma = new printArticle();
+                            NNTPMatchedArticle nntpma = new writeRSS();
+
+
+                            if (args.length ==2 ) {
 								start = new Long(args[0]);
 								end = new Long(args[1]);
 								nntpma = new decodeArticle();

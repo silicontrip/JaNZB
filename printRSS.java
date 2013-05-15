@@ -10,10 +10,11 @@ public class printRSS implements NNTPMatchedArticle {
 
         System.out.println("<item>");
         System.out.println("<title>" + n.getArticleName() .replace("&", "&amp;").replace("<", "&lt;") +"</title>");
-        System.out.println("<link>http://silicontrip.net/~mark/nntpget.php/" + n.getArticleMessageID() .replace("&", "&amp;").replace("<", "&lt;") +"</link>");
+        System.out.println("<link>http://silicontrip.net/~mark/nzb.php/" + n.getArticleMessageID() .replace("&", "&amp;").replace("<", "&lt;") +"</link>");
         System.out.println("<pubDate>"+ n.getArticleDateAsString() +"</pubDate>");
-        System.out.println("<description>"+ n.getArticleSubject().replace("&", "&amp;").replace("<", "&lt;") +"</description>") ;
-        System.out.println("<content>");
+        System.out.println("<description>"+ n.getArticleSubject().replace("&", "&amp;").replace("<", "&lt;") );
+
+      //  System.out.println("<content>");
         System.out.println("Bytes: "+ n.getArticleBytes());
         System.out.println("Lines: "+ n.getArticleLines());
         System.out.println("Path: "+ n.getArticlePath().replace("&", "&amp;").replace("<", "&lt;") );
@@ -23,8 +24,9 @@ public class printRSS implements NNTPMatchedArticle {
         System.out.println("Organization: "+ n.getArticleOrganization());
         System.out.println("NNTP-Posting-Host: "+ n.getArticleNNTPPostingHost());
         System.out.println("Xref: "+ n.getArticleXref());
+        System.out.println("</description>") ;
 
-        System.out.println("</content>");
+        //System.out.println("</content>");
 
         System.out.println("</item>");
 

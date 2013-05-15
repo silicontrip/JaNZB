@@ -2,7 +2,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class AtomicCounter {
 
-	private static AtomicCounter instance = null;
+	//private static AtomicCounter instance = null;
 
 	
 	private AtomicLong counter;

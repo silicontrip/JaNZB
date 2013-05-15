@@ -47,8 +47,8 @@ public class NNTPConnection extends InputStream {
 	private String articleName;
 	
 	private byte[] articleBuffer;
-	private int articleMarker=0;
-	private int articlePointer=0;
+//	private int articleMarker=0;
+//	private int articlePointer=0;
 	
 	/** 
 	 * Class constructor.
@@ -192,9 +192,8 @@ public class NNTPConnection extends InputStream {
 	 * @see java.io.InputStream#reset
 	 * @see #mark(int)
 	 */
-	public void reset() { 
-		;
-	}
+	public void reset() {
+    }
 	
 	/** 
 	 * returns if the Stream is seekable.
@@ -245,7 +244,7 @@ public class NNTPConnection extends InputStream {
 	 * @see #setEndCommand(byte[])
 	 */
 	public String readAsString() throws IOException {
-		String s = new String();
+		String s;
 		int i=0;
 		
 		byte[] b = new byte[1];
@@ -300,12 +299,12 @@ public class NNTPConnection extends InputStream {
 	 *
 	 * @param readlimit unused and is treated as infinite.
 	 */
-	
+/*
 	public void mark(int readlimit)
 	{
 		articleMarker = articlePointer;
 	}
-	
+*/
 	
 	/** 
 	 * returns a single byte of data read from the NNTP server as an integer. Until the terminating marker.
@@ -443,9 +442,7 @@ public class NNTPConnection extends InputStream {
 	 */
 	
 	private boolean NNTPendofcommand(byte[] comm, int l) {
-		if (l > 0) 
-		return NNTPendofcommand ( new String (comm,0,l));
-		return false;
+		return l > 0 &&  NNTPendofcommand ( new String (comm,0,l));
 	}
 	
 	
@@ -477,7 +474,7 @@ public class NNTPConnection extends InputStream {
 	 * This method allows for the marker to appear on the boundary of two buffers.
 	 * First and second buffers are in order they have been read from the NNTP server.
 	 *
-	 * @param comm  the first String buffer of the NNTP server response.
+	 * @param comm1  the first String buffer of the NNTP server response.
 	 * @param comm2  the second String buffer of the NNTP server response.
 	 * @return if the end of data marker is seen.
 	 */
@@ -522,7 +519,7 @@ public class NNTPConnection extends InputStream {
 	 * Some commands end with a newline and some end with a single . on a line.
 	 *
 	 * @deprecated use {@link setEndCommandNewline()} or {@link setEndCommandDot}
-	 * @param comm  the byte array buffer of the end of data marker.
+	 * @param b  the byte array buffer of the end of data marker.
 	 */
 	
 	private void setEndCommand(byte[] b) 
@@ -859,8 +856,6 @@ public class NNTPConnection extends InputStream {
 		
 		articleHeader = new HashMap<String,String>();
 		String r ;
-		String q=null;
-		
 		
 		// the dot end of data marker is only used if the correct response is received.
 		setEndCommandDot();

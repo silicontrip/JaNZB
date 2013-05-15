@@ -1,12 +1,11 @@
 import java.io.*;
 import java.util.*;
-import java.net.*;
 
 public class NzbCollector  {
 	
 	public static void main(String[] args) {
 		
-		NNTPConnection nntp = null;
+		NNTPConnection nntp;
 		
 		try {
 			

@@ -10,10 +10,9 @@ import java.io.FileWriter;
  */
 public class writeRSS {
 
-
     private static String articleDir = "/Users/mark/Sites/nntp";
 
-    public  void processArticle (NNTPConnection n) {
+    public  void processArticle (NNTPConnection n) implements NNTPMatchedArticle {
 
 
         String fileName = articleDir + "/" + n.getArticleMessageID();

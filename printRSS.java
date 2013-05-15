@@ -6,7 +6,12 @@
  * To change this template use File | Settings | File Templates.
  */
 public class printRSS implements NNTPMatchedArticle {
+
+    private static String articleDir = "/Users/mark/Sites/nntp";
+
     public  void processArticle (NNTPConnection n) {
+
+
 
         System.out.println("<item>");
         System.out.println("<title>" + n.getArticleSubject() .replace("&", "&amp;").replace("<", "&lt;") +"</title>");

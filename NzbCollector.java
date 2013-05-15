@@ -55,7 +55,7 @@ public class NzbCollector  {
 								nntpma = new decodeArticle();
 							}
 							
-							System.out.println("Group: " + group + " " + start +"-"+end);
+							// System.out.println("Group: " + group + " " + start +"-"+end);
 							
 							Thread allThreads[];
 							
@@ -86,7 +86,7 @@ public class NzbCollector  {
 							}
 							long totaltime = (System.currentTimeMillis() - starttime) / 1000;
 							
-							System.out.println(end-start + " articles in " + totaltime + " seconds (" + 1.0* (end-start)/totaltime + " a/s)");
+							// System.out.println(end-start + " articles in " + totaltime + " seconds (" + 1.0* (end-start)/totaltime + " a/s)");
 						} catch (NumberFormatException e) {
 							System.out.println("Could not read the properties file: " + e.getMessage());
 						}

@@ -49,7 +49,7 @@ public class writeRSS implements NNTPMatchedArticle {
 
             out.close();
         } catch (IOException exception) {
-            System.out.println("Cannot write article file: " exception.getMessage());
+            System.out.println("Cannot write article file: " + exception.getMessage());
         }
 
     }

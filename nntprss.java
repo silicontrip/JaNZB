@@ -46,6 +46,11 @@ public class nntprss {
                     nntpma.processArticle(nntp);
 
                 }
+
+                nntp.disconnect();
+                nntp.close();
+
+
             }    catch (Exception e) {
 
                 System.out.println("Unexpected error: (actually it was expected but I'm not sure what to do with it)");
@@ -53,8 +58,6 @@ public class nntprss {
 
             }
 
-            nntp.disconnect();
-            nntp.close();
 
         } catch (NNTPUnexpectedResponseException e) {
 

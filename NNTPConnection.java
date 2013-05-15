@@ -244,7 +244,7 @@ public class NNTPConnection extends InputStream {
 	 * @see #setEndCommand(byte[])
 	 */
 	public String readAsString() throws IOException {
-		String s;
+		String s = "";
 		int i=0;
 		
 		byte[] b = new byte[1];
@@ -701,7 +701,7 @@ public class NNTPConnection extends InputStream {
 	
 	public String statArticle (String articleNumber) throws IOException, NNTPNoSuchArticleException
 	{
-		String s = new String();
+		String s ;
 		
 		// System.out.println("STAT " + articleNumber );
 		setEndCommandNewline();

@@ -701,7 +701,7 @@ public class NNTPConnection extends InputStream {
 	
 	public String statArticle (String articleNumber) throws IOException, NNTPNoSuchArticleException
 	{
-		String s;
+		String s = new String();
 		
 		// System.out.println("STAT " + articleNumber );
 		setEndCommandNewline();

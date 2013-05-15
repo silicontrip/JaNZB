@@ -39,7 +39,7 @@ public class nntprss {
                 for (String artID : args)
                 {
 
-                    nntp.bodyArticle(artID);
+                    nntp.headArticle(artID);
 
                     NNTPMatchedArticle nntpma = new printRSS();
 

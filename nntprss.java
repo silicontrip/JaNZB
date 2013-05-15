@@ -48,7 +48,7 @@ public class nntprss {
                 }
 
                 nntp.disconnect();
-                nntp.close();
+              //  nntp.close();
 
 
             } catch (Exception e) {

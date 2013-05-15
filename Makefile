@@ -2,7 +2,7 @@
 all: classes
 	jar -cf janzb.jar *.class 
 
-classes: janzb.class  NNTPindex.class NzbMake.class  NzbCollector.class  NNTPget.class NzbCheck.class \
+classes: janzb.class  NNTPindex.class NzbCollector.class  NNTPget.class NzbCheck.class \
 	NzbCollectorThread.class NzbCheckThread.class NNTPyDecoder.class \
 	NNTPNetwork.class NNTPConnection.class NZBfile.class NNTPThread.class NNTPindex.class TCPConnection.class \
 	AtomicCounter.class printArticle.class decodeArticle.class \

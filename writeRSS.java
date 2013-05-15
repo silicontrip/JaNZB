@@ -8,11 +8,11 @@ import java.io.FileWriter;
  * Time: 1:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public class writeRSS {
+public class writeRSS implements NNTPMatchedArticle {
 
     private static String articleDir = "/Users/mark/Sites/nntp";
 
-    public  void processArticle (NNTPConnection n) implements NNTPMatchedArticle {
+    public  void processArticle (NNTPConnection n)  {
 
 
         String fileName = articleDir + "/" + n.getArticleMessageID();

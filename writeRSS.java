@@ -26,7 +26,7 @@ public class writeRSS implements NNTPMatchedArticle {
 
             out.write("<item>\n");
             out.write("<title>" + n.getArticleSubject() .replace("&", "&amp;").replace("<", "&lt;") +"</title>\n");
-            out.write("<link>http://silicontrip.net/~mark/nzb.php/" + n.getArticleMessageID() .replace("&", "&amp;").replace("<", "&lt;") +"</link>\n");
+            out.write("<link>http://silicontrip.net/~mark/nzb.php/" + n.getArticleMessageID() .replace("&", "&amp;").replace("<", "&lt;").replace(">" , "&gt;") +"</link>\n");
             out.write("<pubDate>"+ n.getArticleDateAsString() +"</pubDate>\n");
             out.write("<description>\n");
             //System.out.println.getArticleSubject().replace("&", "&amp;").replace("<", "&lt;") );
@@ -37,7 +37,7 @@ public class writeRSS implements NNTPMatchedArticle {
             out.write("Path: "+ n.getArticlePath().replace("&", "&amp;").replace("<", "&lt;") + "\n");
             out.write("From: "+ n.getArticleFrom().replace("&", "&amp;").replace("<", "&lt;")+ "\n" );
             out.write("Newsgroups: "+ n.getArticleNewsgroups()+ "\n");
-            out.write("Message-ID: "+ n.getArticleMessageID().replace("&", "&amp;").replace("<", "&lt;")+ "\n" );
+            out.write("Message-ID: "+ n.getArticleMessageID().replace("&", "&amp;").replace("<", "&lt;") .replace(">" , "&gt;") + "\n" );
             out.write("Organization: "+ n.getArticleOrganization()+ "\n");
             out.write("NNTP-Posting-Host: "+ n.getArticleNNTPPostingHost()+ "\n");
             out.write("Xref: "+ n.getArticleXref()+ "\n");

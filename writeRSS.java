@@ -26,8 +26,10 @@ public class writeRSS implements NNTPMatchedArticle {
 
             out.write("<item>\n");
             out.write("<title>" + n.getArticleSubject() .replace("&", "&amp;").replace("<", "&lt;") +"</title>\n");
-            out.write("<link>http://silicontrip.net/~mark/nzb.php/" + n.getArticleMessageID() .replace("&", "&amp;").replace("<", "&lt;").replace(">" , "&gt;") +"</link>\n");
+            out.write("<link>http://silicontrip.net/~mark/nzb.php/" + n.getArticleMessageID() .replace("<", "%3C").replace(">" , "%3E").replace("@","%40") +"</link>\n");
             out.write("<pubDate>"+ n.getArticleDateAsString() +"</pubDate>\n");
+            out.write("<guid>"+ n.getArticleMessageID().replace("&", "&amp;").replace("<", "&lt;") .replace(">" , "&gt;") + "</guid>\n" );
+
             out.write("<description>\n");
             //System.out.println.getArticleSubject().replace("&", "&amp;").replace("<", "&lt;") );
 

@@ -20,32 +20,32 @@ public class writeRSS implements NNTPMatchedArticle {
 
 
         try {
-            FileWriter fstream = new FileWriter(fileName, true);
+            FileWriter fstream = new FileWriter(fileName);
             BufferedWriter out = new BufferedWriter(fstream);
 
 
-            out.write("<item>");
-            out.write("<title>" + n.getArticleSubject() .replace("&", "&amp;").replace("<", "&lt;") +"</title>");
-            out.write("<link>http://silicontrip.net/~mark/nzb.php/" + n.getArticleMessageID() .replace("&", "&amp;").replace("<", "&lt;") +"</link>");
-            out.write("<pubDate>"+ n.getArticleDateAsString() +"</pubDate>");
-            out.write("<description>");
+            out.write("<item>\n");
+            out.write("<title>" + n.getArticleSubject() .replace("&", "&amp;").replace("<", "&lt;") +"</title>\n");
+            out.write("<link>http://silicontrip.net/~mark/nzb.php/" + n.getArticleMessageID() .replace("&", "&amp;").replace("<", "&lt;") +"</link>\n");
+            out.write("<pubDate>"+ n.getArticleDateAsString() +"</pubDate>\n");
+            out.write("<description>\n");
             //System.out.println.getArticleSubject().replace("&", "&amp;").replace("<", "&lt;") );
 
             //  System.out.println("<content>");
-            out.write("Bytes: "+ n.getArticleBytes() + " ");
-            out.write("Lines: "+ n.getArticleLines()+ " " );
-            out.write("Path: "+ n.getArticlePath().replace("&", "&amp;").replace("<", "&lt;") + " ");
-            out.write("From: "+ n.getArticleFrom().replace("&", "&amp;").replace("<", "&lt;")+ " " );
-            out.write("Newsgroups: "+ n.getArticleNewsgroups()+ " ");
-            out.write("Message-ID: "+ n.getArticleMessageID().replace("&", "&amp;").replace("<", "&lt;")+ " " );
-            out.write("Organization: "+ n.getArticleOrganization()+ " ");
-            out.write("NNTP-Posting-Host: "+ n.getArticleNNTPPostingHost()+ " ");
-            out.write("Xref: "+ n.getArticleXref()+ " ");
-            out.write("</description>") ;
+            out.write("Bytes: "+ n.getArticleBytes() + "\n");
+            out.write("Lines: "+ n.getArticleLines()+ "\n" );
+            out.write("Path: "+ n.getArticlePath().replace("&", "&amp;").replace("<", "&lt;") + "\n");
+            out.write("From: "+ n.getArticleFrom().replace("&", "&amp;").replace("<", "&lt;")+ "\n" );
+            out.write("Newsgroups: "+ n.getArticleNewsgroups()+ "\n");
+            out.write("Message-ID: "+ n.getArticleMessageID().replace("&", "&amp;").replace("<", "&lt;")+ "\n" );
+            out.write("Organization: "+ n.getArticleOrganization()+ "\n");
+            out.write("NNTP-Posting-Host: "+ n.getArticleNNTPPostingHost()+ "\n");
+            out.write("Xref: "+ n.getArticleXref()+ "\n");
+            out.write("</description>\n") ;
 
             //System.out.println("</content>");
 
-            out.write("</item>");
+            out.write("</item>\n");
 
             out.close();
         } catch (IOException exception) {

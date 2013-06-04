@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<project default="all" name="JaNZB">
+
+
+    <target name="all" depends="classes">
+        <jar destfile="${basedir}/janzb.jar">
+            <fileset dir="${basedir}/classes" includes="**/*.class"/>
+        </jar>
+    </target>
+
+    <target name="classes" depends="directories">
+        <javac srcdir="${basedir}/src"
+               destdir="${basedir}/classes"
+               debug="on"/>
+    </target>
+           <target name="directories">
+               <mkdir dir="${basedir}/classes"/>
+           </target>
+
+</project>

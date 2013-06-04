@@ -2,19 +2,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class AtomicCounter {
 
-	//private static AtomicCounter instance = null;
-
-	
 	private AtomicLong counter;
 	private long end;
 	private long increment;
 	
-//	public static AtomicCounter getInstance() {
-//		if (instance == null) {
-//			instance = new AtomicCounter();
-//		}		
-//		return instance;
-//	}
+
 	
 	public AtomicCounter ()  
 	{

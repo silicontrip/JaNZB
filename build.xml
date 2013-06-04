@@ -12,6 +12,7 @@
     <target name="classes" depends="directories">
         <javac srcdir="${basedir}/src"
                destdir="${basedir}/classes"
+               classpath="${basedir}/lib/jyenc-0.5.jar"
                debug="on"/>
     </target>
            <target name="directories">

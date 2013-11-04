@@ -29,7 +29,12 @@ public  void processArticle (NNTPConnection n)  {
 
     try {
     
+    
         Statement stmt;
+        
+        Class.forName("com.mysql.jdbc.Driver");
+
+        
         Connection con = DriverManager.getConnection(url,"nzb", "nznzb");
         stmt = con.createStatement();
 

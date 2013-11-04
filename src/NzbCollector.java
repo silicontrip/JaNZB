@@ -46,7 +46,7 @@ public class NzbCollector  {
 							Long start = new Long(fileProperties.getProperty(group + ".currentArticle"));
 							
 							//NNTPMatchedArticle nntpma = new printArticle();
-                            NNTPMatchedArticle nntpma = new writeRSS();
+                            NNTPMatchedArticle nntpma = new mysqlRSS();
 
 
                             if (args.length ==2 ) {
@@ -72,7 +72,7 @@ public class NzbCollector  {
 								// going to do this inside the collector thread
 								// nntpthread.connect();
 								// nntpthread.setGroup(group);
-								allThreads[i] = new Thread (new NzbCollectorThread(nntpma ,ac,nntpthread,group,".*nzb.*"));
+								allThreads[i] = new Thread (new NzbCollectorThread(nntpma ,ac,nntpthread,group,".*\.nzb.*"));
 								allThreads[i].start();
 							}
 							

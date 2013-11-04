@@ -1,5 +1,5 @@
 import java.sql.*;
-
+import java.text.SimpleDateFormat;
 
 public class mysqlRSS implements NNTPMatchedArticle {
 
@@ -8,8 +8,16 @@ public class mysqlRSS implements NNTPMatchedArticle {
     
 public  void processArticle (NNTPConnection n)  {
 
+    
+    SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+
    
+    System.out.println("article date: " + df.format(n.getArticleDate()));
+    
     java.sql.Date sqlDate = new java.sql.Date(n.getArticleDate().getTime());
+    System.out.println("sql date: " + df.format(sqlDate));
+    
+    
     
     String description =
     "Bytes: "+ n.getArticleBytes() +

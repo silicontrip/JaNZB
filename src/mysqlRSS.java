@@ -12,10 +12,10 @@ public  void processArticle (NNTPConnection n)  {
     SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
    
-    #System.out.println("article date: " + df.format(n.getArticleDate()));
+    //System.out.println("article date: " + df.format(n.getArticleDate()));
     
     java.sql.Timestamp sqlDate = new java.sql.Timestamp(n.getArticleDate().getTime());
-    #System.out.println("sql date: " + df.format(sqlDate));
+    //System.out.println("sql date: " + df.format(sqlDate));
     
     
     

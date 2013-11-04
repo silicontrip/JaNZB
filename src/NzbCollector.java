@@ -72,7 +72,7 @@ public class NzbCollector  {
 								// going to do this inside the collector thread
 								// nntpthread.connect();
 								// nntpthread.setGroup(group);
-								allThreads[i] = new Thread (new NzbCollectorThread(nntpma ,ac,nntpthread,group,".*\.nzb.*"));
+								allThreads[i] = new Thread (new NzbCollectorThread(nntpma ,ac,nntpthread,group,".*\\.nzb.*"));
 								allThreads[i].start();
 							}
 							

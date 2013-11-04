@@ -11,11 +11,7 @@ public  void processArticle (NNTPConnection n)  {
    
     java.sql.Date sqlDate = new java.sql.Date(n.getArticleDate().getTime());
     
-    String query = "INSERT INTO NNTPArticle (message_id,creation_time,title,description) VALUES ('" +
-    n.getArticleMessageID() + "', '" +
-    sqlDate + "', '" +
-    n.getArticleSubject() + "', '" +
-    
+    String description =
     "Bytes: "+ n.getArticleBytes() +
     " Lines: "+ n.getArticleLines() +
     " Path: "+ n.getArticlePath() +
@@ -24,8 +20,7 @@ public  void processArticle (NNTPConnection n)  {
     " Message-ID: "+ n.getArticleMessageID() +
     " Organization: "+ n.getArticleOrganization() +
     " NNTP-Posting-Host: "+ n.getArticleNNTPPostingHost() +
-    " Xref: "+ n.getArticleXref()+
-    "')";
+    " Xref: "+ n.getArticleXref();
 
     try {
     
@@ -36,10 +31,16 @@ public  void processArticle (NNTPConnection n)  {
 
         
         Connection con = DriverManager.getConnection(url,"nzb", "nznzb");
-        stmt = con.createStatement();
+        
+        PreparedStatement query = con.prepareStatement("INSERT INTO NNTPArticle (message_id,creation_time,title,description) VALUES (?,?,?,?)");
+        
+        query.setString(1, n.getArticleMessageID());
+        query.setDate(2,sqlDate);        
+        query.setString(3,  n.getArticleSubject());
+        query.setString(4,description);
 
-    
-        stmt.executeUpdate(query);
+        query.executeUpdate();
+        
     
         con.close();
 

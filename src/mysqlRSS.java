@@ -9,11 +9,11 @@ public class mysqlRSS implements NNTPMatchedArticle {
 public  void processArticle (NNTPConnection n)  {
 
    
-    
+    java.sql.Date sqlDate = new java.sql.Date(n.getArticleDate().getTime());
     
     String query = "INSERT INTO NNTPArticle (message_id,creation_time,title,description) VALUES ('" +
     n.getArticleMessageID() + "', '" +
-    n.getArticleDateAsString() + "', '" +
+    sqlDate + "', '" +
     n.getArticleSubject() + "', '" +
     
     "Bytes: "+ n.getArticleBytes() +

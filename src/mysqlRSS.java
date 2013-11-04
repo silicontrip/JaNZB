@@ -12,10 +12,10 @@ public  void processArticle (NNTPConnection n)  {
     SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
    
-    System.out.println("article date: " + df.format(n.getArticleDate()));
+    #System.out.println("article date: " + df.format(n.getArticleDate()));
     
-    java.sql.Date sqlDate = new java.sql.Date(n.getArticleDate().getTime());
-    System.out.println("sql date: " + df.format(sqlDate));
+    java.sql.Timestamp sqlDate = new java.sql.Timestamp(n.getArticleDate().getTime());
+    #System.out.println("sql date: " + df.format(sqlDate));
     
     
     
@@ -43,7 +43,7 @@ public  void processArticle (NNTPConnection n)  {
         PreparedStatement query = con.prepareStatement("INSERT INTO NNTPArticle (message_id,creation_time,title,description) VALUES (?,?,?,?)");
         
         query.setString(1, n.getArticleMessageID());
-        query.setDate(2,sqlDate);        
+        query.setTimestamp(2,sqlDate);        
         query.setString(3,  n.getArticleSubject());
         query.setString(4,description);
 

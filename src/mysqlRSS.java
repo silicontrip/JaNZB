@@ -46,6 +46,9 @@ public  void processArticle (NNTPConnection n)  {
     } catch (java.sql.SQLException sqe) {
         
         System.out.println("SQL Error: " + sqe.getMessage());
+    } catch ( ClassNotFoundException cnfe) {
+        System.out.println("Class not found: " + cnfe.getMessage());
+
     }
 }
 

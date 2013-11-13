@@ -1,7 +1,7 @@
 <?php
 
     if ($_SERVER['PATH_INFO']) {
-        $download_url = 'http://' . $_SERVER['PATH_INFO'];
+        $download_url = 'http:/' . $_SERVER['PATH_INFO'];
     } else {
         $download_url='http://silicontrip.net/~mark/nzb.php/';
     }

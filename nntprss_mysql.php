@@ -1,8 +1,12 @@
 <?php
 
-	$download_url='http://silicontrip.net/~mark/nzb.php/';
-
-        $dbcon=mysqli_connect('127.0.0.1','nzb','nznzb','newzearch');
+    if ($_SERVER['PATH_INFO']) {
+        $download_url = 'http://' . $_SERVER['PATH_INFO'];
+    } else {
+        $download_url='http://silicontrip.net/~mark/nzb.php/';
+    }
+    
+    $dbcon=mysqli_connect('127.0.0.1','nzb','nznzb','newzearch');
 
 
         if (mysqli_connect_errno($dbcon))
@@ -33,7 +37,7 @@
 http://silicontrip.net/~mark/nntpget.php
 </link>
 <description>Collection of nzb articles.</description> <language>en-us</language>
-<atom:link href="http://silicontrip.net/~mark/nntprss.php" rel="self"
+<atom:link href="<?=$_SERVER['SCRIPT_NAME']?>" rel="self"
 	type="application/rss+xml" />
 <?
 

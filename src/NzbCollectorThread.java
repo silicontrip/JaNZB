@@ -10,12 +10,14 @@ public class NzbCollectorThread implements Runnable {
 	private String match;
 	private NNTPMatchedArticle callback;
 	private String group;
+	private Boolean verbose;
 	
 	private AtomicCounter ac;
 	
 	public NzbCollectorThread (NNTPMatchedArticle nma, AtomicCounter atom, String grp,NNTPConnection nn) { this(nma,atom,nn,grp,".*"); }
+	public NzbCollectorThread (NNTPMatchedArticle nma, AtomicCounter atom, NNTPConnection nn, String grp,  String ma) { this(nma,atom,nn,grp,ma,false); }
 	
-	public NzbCollectorThread (NNTPMatchedArticle nma, AtomicCounter atom, NNTPConnection nn, String grp,  String ma) {
+	public NzbCollectorThread (NNTPMatchedArticle nma, AtomicCounter atom, NNTPConnection nn, String grp,  String ma, Boolean ver) {
 		//setStart(st);
 		//setEnd(en);
 		//setIncrement(in);
@@ -24,6 +26,7 @@ public class NzbCollectorThread implements Runnable {
 		setMatch(ma);
 		setNNTPMatchedArticle(nma);
 		setGroup(grp);
+		setVerbose(ver);
 	}
 	
 	//	public void setStart(int i) { start = i; }
@@ -33,6 +36,8 @@ public class NzbCollectorThread implements Runnable {
 	public void setNNTP(NNTPConnection i) { nntp = i; }
 	public void setNNTPMatchedArticle(NNTPMatchedArticle nma) { callback = nma; }
 	public void setGroup(String g) { group = g; }
+	public void setVerbose(Boolean v) { verbose = v; }
+	public Boolean isVerbose() { return verbose; }
 	
 	public void setMatch(String m) { 
 		if (m!=null) {
@@ -50,7 +55,9 @@ public class NzbCollectorThread implements Runnable {
 			do {
 				
 				try {
-					// System.out.println("Thread connecting to NNTP server.");
+					if (isVerbose()) {
+						System.out.println("Thread connecting to NNTP server.");
+					}
 
 					nntp.connect();
 					nntp.setGroup(group);
@@ -63,14 +70,17 @@ public class NzbCollectorThread implements Runnable {
 							
 							nntp.headArticle(is);
 							
-							//System.out.println ("" + i + ": Subject: " + subject + "match: " + match);
+							if (isVerbose()) {
+								System.out.println ("" + i + ": " + nntp.getArticleSubject());
+							}
 							
 							if (nntp.getArticleSubject().matches(match)) { callback.processArticle(nntp); }
 						} catch (NNTPNoSuchArticleException e) {
 							;
-							// don't want to know if the article isn't there.
-							// System.out.println("Couldn't find article: " + e.getMessage());
+							if (isVerbose()) {
+							 System.out.println("Couldn't find article: " + e.getMessage());
 							// e.printStackTrace();
+							}
 						} 
 						
 					}

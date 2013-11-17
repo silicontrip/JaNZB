@@ -5,6 +5,9 @@
     } else {
         $download_url='http://silicontrip.net/~mark/nzb.php/';
     }
+
+libxml_use_internal_errors(true);
+
     
     $dbcon=mysqli_connect('127.0.0.1','nzb','nznzb','newzearch');
 
@@ -27,45 +30,44 @@
 	header ( 'Content-type: application/xml' );
 	set_time_limit ( 300 );
 
-	print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	$rss = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"' . '?' . '>' . "\r\n" . ' <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"/>');
 
+	$rss->addChild('channel');
+	$rss->channel->addChild('title','alt.binaries.teevee');
+	$rss->channel->addChild('link','http://silicontrip.net/~mark/nntpget.php');
+	$rss->channel->addChild('description','Collection of nzb articles.');
+	$rss->channel->addChild('language','en');
+#	$rss->channel->children('atom',true)->addChild('link');
+#	$rss->channel->children('atom',true)->link->addAttribute('href',$_SERVER['SCRIPT_NAME']);
+#	$rss->channel->children('atom',true)->link->addAttribute('rel','self');
+#	$rss->channel->children('atom',true)->link->addAttribute('type','application/rss+xml');
 
-?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"> <channel>
-<title>alt.binaries.teevee</title>
-<link>
-http://silicontrip.net/~mark/nntpget.php
-</link>
-<description>Collection of nzb articles.</description> <language>en-us</language>
-<atom:link href="<?=$_SERVER['SCRIPT_NAME']?>" rel="self"
-	type="application/rss+xml" />
-<?
+	$rss->channel->addChild('lastBuildDate',$builddate);
 
-	print "<lastBuildDate>$builddate</lastBuildDate>\n";
-
+	$count = 0;
         while ($row = mysqli_fetch_assoc($result)) {
-	$link = $download_url . htmlentities($row['message_id']);
-	$description=htmlentities($row['description']);
-?>
-<item>
-<title><?=$row['title']?></title>
-<link><?=$link?></link>
-<pubDate><?=$row['creation_time']?></pubDate>
-<guid><?=$link?></guid>
-<description><?=$description?>
-</description>
-</item>
-<?php
 
+		$rss->channel->addChild('item');
+
+		$link = $download_url . $row['message_id'];
+		#$striptitle = preg_replace ('^[^"]*"([^"]*)" yEnc \(\d/\d\)$','$1',$row['title']);
+		$item = explode('"',$row['title']);
+
+		$rss->channel->item[$count]->addChild('title',$item[1]);
+		$rss->channel->item[$count]->addChild('link',$link);
+		$rss->channel->item[$count]->addChild('pubDate',$row['creation_time']);
+		$rss->channel->item[$count]->addChild('guid',$link);
+		$rss->channel->item[$count]->addChild('description',$row['title'] . " " . $row['description']);
+	$count++;
         }
-
 
         mysqli_free_result($result);
         mysqli_close($dbcon);
 
+echo $rss->asXML();
+
 
 ?>
 
 
-</channel> </rss>
 

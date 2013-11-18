@@ -101,6 +101,31 @@ public class NZBfile implements java.io.Serializable {
 
 	}
 
+public Boolean hasFileForSubject(String subject)
+
+	NodeList allFiles = getAllFiles();
+		for (int i = 0; i < allFiles.getLength(); i++)
+		{
+
+			Node n = allFiles.item(i);
+
+			if (n.hasAttributes())
+			{
+				// check subject
+
+				Node nzbsubject = n.getAttributes().getNamedItem(SUBJECT_ATTR_NAME);
+				// return match
+
+				if (subject.equals(nzbsubject.getNodeValue()))
+				{
+					return true;
+				} 
+
+			}	
+		}
+		return false;
+	}
+
 	protected Node getFileForSubject(String subject)
 	{
 		// get all files
@@ -133,6 +158,7 @@ public class NZBfile implements java.io.Serializable {
 
 		// get file for subject
 		Element file = (Element)getFileForSubject(subject);
+
 		// get segments
 
 		Node  nzbsegments=  file.getElementsByTagName(SEGMENT_LIST_NAME).item(0);

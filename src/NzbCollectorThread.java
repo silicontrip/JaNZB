@@ -71,7 +71,7 @@ public class NzbCollectorThread implements Runnable {
 							nntp.headArticle(is);
 							
 							if (isVerbose()) {
-								System.out.println ("" + i + ": " + nntp.getArticleSubject());
+								System.out.println ("" + i + ": " + nntp.getArticleDate() + " " + nntp.getArticleSubject());
 							}
 							
 							if (nntp.getArticleSubject().matches(match)) { callback.processArticle(nntp); }

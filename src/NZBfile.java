@@ -101,8 +101,8 @@ public class NZBfile implements java.io.Serializable {
 
 	}
 
-public Boolean hasFileForSubject(String subject)
-
+public Boolean hasFileForSubject(String subject) 
+{
 	NodeList allFiles = getAllFiles();
 		for (int i = 0; i < allFiles.getLength(); i++)
 		{

@@ -93,9 +93,9 @@ public class NZBfile implements java.io.Serializable {
 
 	public static String getSegmentNumberFromSubject(String subject)
 	{
-		String[] ele = subject.split('yEnc');
-		String[] ele2 = ele[1].split('/');
-		String[] ele3 = ele2[0].split('(');
+		String[] ele = subject.split("yEnc");
+		String[] ele2 = ele[1].split("/");
+		String[] ele3 = ele2[0].split("(");
 
 		return ele3[1];
 
@@ -105,19 +105,16 @@ public class NZBfile implements java.io.Serializable {
 	{
 		// get all files
 
-		NodeList allFiles = getAllFiles()
-
-		for (Node n : allFiles)
+		for (Node n : getAllFiles())
 		{
 			if (n.hasAttributes())
 			{
 				// check subject
 
-				NamedNodeMap attributes = n.getAttributes();
-				Node subject = attributes.getNamedItem(SUBJECT_ATTR_NAME);
+				Node nzbsubject = n.getAttributes().getNamedItem(SUBJECT_ATTR_NAME);
 				// return match
 
-				if (subject.equals(subject.getNodeValue()))
+				if (subject.equals(nzbsubject.getNodeValue()))
 				{
 					return n;
 				} 
@@ -141,7 +138,7 @@ public class NZBfile implements java.io.Serializable {
 		nzbsegment.setAttribute(NUMBER_ATTR_NAME,segmentNumber);
 		nzbsegment.appendChild(nzbdoc.createTextNode(s));
 		// add segment
-			nzbsegments.appendChild(nzbsegment);
+		nzbsegments.appendChild(nzbsegment);
 
 	}
 

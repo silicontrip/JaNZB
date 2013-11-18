@@ -23,6 +23,7 @@ public class NZBfile implements java.io.Serializable {
 	protected static final String SEGMENT_NODE_NAME = "segment";
 	protected static final String SUBJECT_ATTR_NAME = "subject";
 	protected static final String NUMBER_ATTR_NAME = "number";
+	protected static final String BYTES_ATTR_NAME = "bytes";
 
 	
 	public NZBfile(String file) throws ParserConfigurationException, SAXException, IOException  {
@@ -69,7 +70,6 @@ public class NZBfile implements java.io.Serializable {
 		// Add subject
 		nzbfile.setAttribute(SUBJECT_ATTR_NAME,subject);
 
-
 		Element nzbgroups = nzbdoc.createElement(GROUP_LIST_NAME);
 		Element nzbsegments = nzbdoc.createElement(SEGMENT_LIST_NAME);
 
@@ -94,9 +94,8 @@ public class NZBfile implements java.io.Serializable {
 	public static String getSegmentNumberFromSubject(String subject)
 	{
 		String[] ele = subject.split('yEnc');
-
-		String[] ele2 = ele[1].split("/");
-		String[] ele3 = ele2[0].split("(");
+		String[] ele2 = ele[1].split('/');
+		String[] ele3 = ele2[0].split('(');
 
 		return ele3[1];
 
@@ -135,7 +134,7 @@ public class NZBfile implements java.io.Serializable {
 		Node file = getFileForSubject(subject);
 		// get segments
 
-
+		Node  nzbsegments=  file.getElementsByTagName(SEGMENT_LIST_NAME).item(0);
 
 		// create segment
 		Element nzbsegment = nzbdoc.createElement(SEGMENT_NODE_NAME);
@@ -235,14 +234,14 @@ public class NZBfile implements java.io.Serializable {
 		int m=0;
 		
 		for (int n=0; n < getTotalFilesLength(); n++) 
-			if (((Attr)nzbFiles.item(n).getAttributes().getNamedItem("subject")).getValue().matches(filter)) 
+			if (((Attr)nzbFiles.item(n).getAttributes().getNamedItem(SUBJECT_ATTR_NAME)).getValue().matches(filter)) 
 				m++;
 		
 		filterMapping = new int[m];
 		m=0;
 		
 		for (int n=0; n < getTotalFilesLength(); n++) 
-			if (((Attr)nzbFiles.item(n).getAttributes().getNamedItem("subject")).getValue().matches(filter)) 
+			if (((Attr)nzbFiles.item(n).getAttributes().getNamedItem(SUBJECT_ATTR_NAME)).getValue().matches(filter)) 
 				filterMapping[m++]=n;
 		
 		
@@ -282,17 +281,17 @@ public class NZBfile implements java.io.Serializable {
 	
 	public int getFileSegmentsSize(int f, int s) {
 		NodeList seg;	
-		seg = getFileSegments(f);
+		seg = getFileSegment(f);
 		try {
-			return Integer.parseInt(((Attr)seg.item(s).getAttributes().getNamedItem("bytes")).getValue());
+			return Integer.parseInt(((Attr)seg.item(s).getAttributes().getNamedItem(BYTES_ATTR_NAME)).getValue());
 		} catch (NumberFormatException nfe) { return 0; }
 	}
 	
 	public int getFileSegmentsLength(int i) { return getFileSegments(i).getLength();}
 	
 	public NodeList getFileSegment(int i) {
-		if (nzbFiles.item(this.mapFilter(i)).getNodeName().equals("file")) {
-			return ((Element)nzbFiles.item(this.mapFilter(i))).getElementsByTagName("segment");
+		if (nzbFiles.item(this.mapFilter(i)).getNodeName().equals(FILE_NODE_NAME)) {
+			return ((Element)nzbFiles.item(this.mapFilter(i))).getElementsByTagName(SEGMENT_NODE_NAME);
 		}
 		return null;
 	}

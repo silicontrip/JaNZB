@@ -43,7 +43,7 @@ public class NzbCreator {
 				
 				AtomicCounter forward = new AtomicCounter(articleStart, articleEnd, 1);
 				
-				NNTPMatchedArticle matchedArticle = new createNZB();
+				NNTPMatchedArticle matchedArticle = new createNZB(group);
 				
 				Thread allThreads[];
 				allThreads = new Thread[threads];

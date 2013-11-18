@@ -15,8 +15,7 @@
 			String fileSegmentNumber = nzb.getSegmentNumberFromSubject( n.getArticleSubject());			
 
 			synchronized (this) {
-				Node file = nzb.getFileForSubject(fileSubject);
-				if (file == null) {
+				if (!nzb.hasFileForSubject(fileSubject)) {
 					nzb.addFile(fileSubject,group);
 				}
 				nzb.addSegmentToFile(fileSubject,n.getMessageID(),fileSegmentNumber);

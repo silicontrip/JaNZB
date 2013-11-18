@@ -132,7 +132,7 @@ public class NZBfile implements java.io.Serializable {
 	{
 
 		// get file for subject
-		Node file = getFileForSubject(subject);
+		Element file = (Element)getFileForSubject(subject);
 		// get segments
 
 		Node  nzbsegments=  file.getElementsByTagName(SEGMENT_LIST_NAME).item(0);

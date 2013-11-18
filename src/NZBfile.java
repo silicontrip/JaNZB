@@ -60,9 +60,66 @@ public class NZBfile implements java.io.Serializable {
 		
 	}
 	
+	public void addFile (String subject, String group)
+	{
+		
+		Element nzbfile = nzbdoc.createElement(FILE_NODE_NAME);
+		// Add subject
+
+		Element nzbgroups = nzbdoc.createElement(GROUP_LIST_NAME);
+		Element nzbsegments = nzbdoc.createElement(SEGMENT_LIST_NAME);
+
+	
+		Element nzbgroup = nzbdoc.createElement(GROUP_NODE_NAME);
+		nzbgroup.appendChild(nzbdoc.createTextNode(group));
+		nzbgroups.appendChild(nzbgroup);
+	
+		nzbfile.appendChild(nzbgroups);
+
+
+	}
+
+	public static String getFileNameFromSubject(String subject)
+	{
+		String[] ele = subject.split('"');
+		// should validate
+		return ele[1];
+	}
+
+	public static String getSegmentNumberFromSubject(String subject)
+	{
+		String[] ele = subject.split('yEnc');
+
+		String[] ele2 = ele[1].split("/");
+		String[] ele3 = ele2[0].split("(");
+
+		return ele3[1];
+
+	}
+
+	protected Element getFileForSubject(String subject)
+	{
+		// get all files
+		// check subject
+		// return match
+
+	}
+
+	public void addSegmentToFile(String subject, String segmentArticle)
+	{
+
+		// get file for subject
+		// get segments
+		// create segment
+		// add segment
+
+	}
+
+
 	public void appendFile (ArrayList<String> groups, ArrayList<String> segments) {
 	
 		Element nzbfile = nzbdoc.createElement(FILE_NODE_NAME);
+		// Add subject
 
 		Element nzbgroups = nzbdoc.createElement(GROUP_LIST_NAME);
 		Element nzbsegments = nzbdoc.createElement(SEGMENT_LIST_NAME);

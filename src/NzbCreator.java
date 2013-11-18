@@ -10,7 +10,11 @@ public class NzbCreator {
 		
 		NNTPConnection nntp = null;
 		
-//        561407040 - 562059827
+//        561430118 - 562059827
+        
+        
+//        561709547
+        
   // 151811
         
         

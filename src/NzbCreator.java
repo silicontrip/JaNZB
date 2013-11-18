@@ -23,7 +23,7 @@ public class NzbCreator {
 			Long articleEnd = new Long(args[2]);
 			String articleMatchArgs = args[3];
             
-            nzbfile = new NZBfile();
+            NZBfile nzbfile = new NZBfile();
 			
 			Properties fileProperties = new Properties();
 			
@@ -49,7 +49,7 @@ public class NzbCreator {
 				
 				AtomicCounter forward = new AtomicCounter(articleStart, articleEnd, 1);
 				
-				NNTPMatchedArticle matchedArticle = new createNZB(group);
+				NNTPMatchedArticle matchedArticle = new createNZB(group,nzbfile);
 				
 				Thread allThreads[];
 				allThreads = new Thread[threads];
@@ -90,7 +90,10 @@ public class NzbCreator {
 				System.out.println("Couldn't find group: " + e.getMessage());
 			} catch (NNTPGroupResponseException e) {
 				System.out.println("Problem getting group from NNTP server: " + e.getMessage());
-			}
+			} catch (javax.xml.parsers.ParserConfigurationException e) {
+                System.out.println("XML parsing error: " + e.getMessage());
+
+            }
 			
 			
 			try {
@@ -104,7 +107,9 @@ public class NzbCreator {
 			
 		} catch (IOException e) {
 			System.out.println("Problem connecting to NNTP server: " + e.getMessage());
-		} 
+		} catch (javax.xml.parsers.ParserConfigurationException e) {
+            			System.out.println("XML parsing error: " + e.getMessage());
+        }
 		
 	}
 	

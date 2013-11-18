@@ -21,6 +21,8 @@ public class NZBfile implements java.io.Serializable {
 	protected static final String GROUP_NODE_NAME = "group";
 	protected static final String SEGMENT_LIST_NAME = "segments";
 	protected static final String SEGMENT_NODE_NAME = "segment";
+	protected static final String SUBJECT_ATTR_NAME = "subject";
+	protected static final String NUMBER_ATTR_NAME = "number";
 
 	
 	public NZBfile(String file) throws ParserConfigurationException, SAXException, IOException  {
@@ -65,6 +67,8 @@ public class NZBfile implements java.io.Serializable {
 		
 		Element nzbfile = nzbdoc.createElement(FILE_NODE_NAME);
 		// Add subject
+		nzbfile.setAttribute(SUBJECT_ATTR_NAME,subject);
+
 
 		Element nzbgroups = nzbdoc.createElement(GROUP_LIST_NAME);
 		Element nzbsegments = nzbdoc.createElement(SEGMENT_LIST_NAME);
@@ -76,6 +80,7 @@ public class NZBfile implements java.io.Serializable {
 	
 		nzbfile.appendChild(nzbgroups);
 
+		nzbFiles.appendChild(nzbfile);
 
 	}
 
@@ -97,21 +102,47 @@ public class NZBfile implements java.io.Serializable {
 
 	}
 
-	protected Element getFileForSubject(String subject)
+	protected Node getFileForSubject(String subject)
 	{
 		// get all files
-		// check subject
-		// return match
 
+		NodeList allFiles = getAllFiles()
+
+		for (Node n : allFiles)
+		{
+			if (n.hasAttributes())
+			{
+				// check subject
+
+				NamedNodeMap attributes = n.getAttributes();
+				Node subject = attributes.getNamedItem(SUBJECT_ATTR_NAME);
+				// return match
+
+				if (subject.equals(subject.getNodeValue()))
+				{
+					return n;
+				} 
+
+			}	
+		}
+		return null;
 	}
 
-	public void addSegmentToFile(String subject, String segmentArticle)
+	public void addSegmentToFile(String subject, String segmentArticle, String segmentNumber)
 	{
 
 		// get file for subject
+		Node file = getFileForSubject(subject);
 		// get segments
+
+
+
 		// create segment
+		Element nzbsegment = nzbdoc.createElement(SEGMENT_NODE_NAME);
+		nzbsegment.setAttribute(NUMBER_ATTR_NAME,segmentNumber);
+		nzbsegment.appendChild(nzbdoc.createTextNode(s));
 		// add segment
+			nzbsegments.appendChild(nzbsegment);
 
 	}
 
@@ -119,6 +150,7 @@ public class NZBfile implements java.io.Serializable {
 	public void appendFile (ArrayList<String> groups, ArrayList<String> segments) {
 	
 		Element nzbfile = nzbdoc.createElement(FILE_NODE_NAME);
+		nzbfile.setAttribute(SUBJECT_ATTR_NAME,"");
 		// Add subject
 
 		Element nzbgroups = nzbdoc.createElement(GROUP_LIST_NAME);
@@ -168,6 +200,12 @@ public class NZBfile implements java.io.Serializable {
 		
 	}
 	
+
+	public NodeList getAllFiles()
+	{
+		return nzbdoc.getElementsByTagName(FILE_NODE_NAME);
+	}
+
 	public NodeList getAllSegments()
 	{
 		return nzbdoc.getElementsByTagName(SEGMENT_NODE_NAME);
@@ -234,12 +272,12 @@ public class NZBfile implements java.io.Serializable {
 	}
 	
 	public String getFileSubjectTotal(int i) {
-		return ((Attr)nzbFiles.item(i).getAttributes().getNamedItem("subject")).getValue();
+		return ((Attr)nzbFiles.item(i).getAttributes().getNamedItem(SUBJECT_ATTR_NAME)).getValue();
 	}
 	
 	
 	public String getFileSubject(int i) {
-		return ((Attr)nzbFiles.item(this.mapFilter(i)).getAttributes().getNamedItem("subject")).getValue();
+		return ((Attr)nzbFiles.item(this.mapFilter(i)).getAttributes().getNamedItem(SUBJECT_ATTR_NAME)).getValue();
 	}
 	
 	public int getFileSegmentsSize(int f, int s) {
@@ -252,7 +290,7 @@ public class NZBfile implements java.io.Serializable {
 	
 	public int getFileSegmentsLength(int i) { return getFileSegments(i).getLength();}
 	
-	public NodeList getFileSegments(int i) {
+	public NodeList getFileSegment(int i) {
 		if (nzbFiles.item(this.mapFilter(i)).getNodeName().equals("file")) {
 			return ((Element)nzbFiles.item(this.mapFilter(i))).getElementsByTagName("segment");
 		}

@@ -80,13 +80,13 @@ public class NZBfile implements java.io.Serializable {
 	
 		nzbfile.appendChild(nzbgroups);
 
-		nzbFiles.appendChild(nzbfile);
+		nzbdoc.appendChild(nzbfile);
 
 	}
 
 	public static String getFileNameFromSubject(String subject)
 	{
-		String[] ele = subject.split('"');
+		String[] ele = subject.split("\"");
 		// should validate
 		return ele[1];
 	}
@@ -105,8 +105,12 @@ public class NZBfile implements java.io.Serializable {
 	{
 		// get all files
 
-		for (Node n : getAllFiles())
+		NodeList allFiles = getAllFiles();
+		for (int i = 0; i < allFiles.getLength(); i++)
 		{
+
+			Node n = allFiles.item(i);
+
 			if (n.hasAttributes())
 			{
 				// check subject
@@ -136,7 +140,7 @@ public class NZBfile implements java.io.Serializable {
 		// create segment
 		Element nzbsegment = nzbdoc.createElement(SEGMENT_NODE_NAME);
 		nzbsegment.setAttribute(NUMBER_ATTR_NAME,segmentNumber);
-		nzbsegment.appendChild(nzbdoc.createTextNode(s));
+		nzbsegment.appendChild(nzbdoc.createTextNode(segmentArticle));
 		// add segment
 		nzbsegments.appendChild(nzbsegment);
 
@@ -284,7 +288,7 @@ public class NZBfile implements java.io.Serializable {
 		} catch (NumberFormatException nfe) { return 0; }
 	}
 	
-	public int getFileSegmentsLength(int i) { return getFileSegments(i).getLength();}
+	public int getFileSegmentsLength(int i) { return getFileSegment(i).getLength();}
 	
 	public NodeList getFileSegment(int i) {
 		if (nzbFiles.item(this.mapFilter(i)).getNodeName().equals(FILE_NODE_NAME)) {

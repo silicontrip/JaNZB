@@ -10,6 +10,10 @@ public class NzbCreator {
 		
 		NNTPConnection nntp = null;
 		
+//        561407040 - 562059827
+  // 151811
+        
+        
 		try {
 			
 			// check that all arguments are present...
@@ -18,6 +22,8 @@ public class NzbCreator {
 			Long articleStart = new Long(args[1]);
 			Long articleEnd = new Long(args[2]);
 			String articleMatchArgs = args[3];
+            
+            nzbfile = new NZBfile();
 			
 			Properties fileProperties = new Properties();
 			
@@ -72,7 +78,7 @@ public class NzbCreator {
 					}
 				}
 				
-				
+				System.out.println (nzbfile);
 				
 			} catch (NumberFormatException e) {
 				System.out.println("Could not read the group articles range: " + e.getMessage());

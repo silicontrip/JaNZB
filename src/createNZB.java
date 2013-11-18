@@ -3,9 +3,9 @@
 		NZBfile nzb;
 		String group;
 
-		public createNZB (String g) throws javax.xml.parsers.ParserConfigurationException
+		public createNZB (String g, NZBfile f) throws javax.xml.parsers.ParserConfigurationException
 		{
-			nzb= new NZBfile();
+			nzb= f;
 			group = g;
 		}
 		

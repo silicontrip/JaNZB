@@ -30,6 +30,24 @@ libxml_use_internal_errors(true);
 	header ( 'Content-type: application/xml' );
 	set_time_limit ( 300 );
 
+	$doc =  new DOMDocument("1.0");
+	$doc->formatOutput = true;
+	$docrss = $doc->createElement( "rss" );
+	$doc->appendChild( $docrss );
+	$docchannel = $doc->createElement( "channel" );
+	$docrss->appendChild($docchannel);
+	$doctitle = $doc->createElement( "title" ); $doctitle->appendChild($doc->createTextNode("alt.binaries.teevee"));
+	$doclink = $doc->createElement( "link" ); $doclink->appendChild($doc->createTextNode("http://silicontrip.net/~mark/nntprss_mysql.php"));
+	$docdescription = $doc->createElement( "description" ); $docdescription->appendChild($doc->createTextNode("collection of nzb articles."));
+	$doclanguage = $doc->createElement( "language" ); $doclanguage->appendChild($doc->createTextNode("en"));
+	$docbuilddate = $doc->createElement( "lastBuildDate" ); $docbuilddate->appendChild($doc->createTextNode($builddate));
+
+	$docchannel->appendChild($doctitle);
+	$docchannel->appendChild($doclink);
+	$docchannel->appendChild($docdescription);
+	$docchannel->appendChild($doclanguage);
+	$docchannel->appendChild($docbuilddate);
+
 	$rss = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"' . '?' . '>' . "\r\n" . ' <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"/>');
 
 	$rss->addChild('channel');
@@ -47,6 +65,7 @@ libxml_use_internal_errors(true);
 	$count = 0;
         while ($row = mysqli_fetch_assoc($result)) {
 
+		$docitem = $doc->createElement( "item" );
 		$rss->channel->addChild('item');
 
 		$link = $download_url . $row['message_id'];
@@ -58,13 +77,27 @@ libxml_use_internal_errors(true);
 		$rss->channel->item[$count]->addChild('pubDate',$row['creation_time']);
 		$rss->channel->item[$count]->addChild('guid',$link);
 		$rss->channel->item[$count]->addChild('description',$row['title'] . " " . $row['description']);
+
+		$itemtitle = $doc->createElement( "title" ); $itemtitle->appendChild($doc->createTextNode($item[1]));
+		$itemlink = $doc->createElement( "link" ); $itemlink->appendChild($doc->createTextNode($link));
+		$itempubdate = $doc->createElement( "pubDate" ); $itempubdate->appendChild($doc->createTextNode($row['creation_time']));
+		$itemguid = $doc->createElement( "guid" ); $itemguid->appendChild($doc->createTextNode($link));
+		$itemdescription = $doc->createElement( "description" ); $itemdescription->appendChild($doc->createTextNode($row['title'] . " " . $row['description']));
+
+		$docitem->appendChild($itemtitle);
+		$docitem->appendChild($itemlink);
+		$docitem->appendChild($itempubdate);
+		$docitem->appendChild($itemguid);
+		$docitem->appendChild($itemdescription);
+		$docchannel->appendChild($docitem);
 	$count++;
         }
 
         mysqli_free_result($result);
         mysqli_close($dbcon);
 
-echo $rss->asXML();
+#echo $rss->asXML();
+echo $doc->saveXML();
 
 
 ?>

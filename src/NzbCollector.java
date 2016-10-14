@@ -6,6 +6,8 @@ public class NzbCollector  {
 	public static void main(String[] args) {
 		
 		NNTPConnection nntp;
+		Arguments ag = new Arguments(args);
+		boolean verbose = ag.hasOption("v");
 		
 		try {
 			
@@ -20,17 +22,20 @@ public class NzbCollector  {
 			String host = fileProperties.getProperty("NewsServerHost");
 			
 			// maybe should put this in the properties file.
-			// nntp.enableDebug();
-			
 			for (String group : fileProperties.getProperty("Groups").split(",")) {
 				
 				try {
 					nntp = new NNTPConnection(host,port);
-                    nntp.connect();
 
+					//if (verbose)
+				//		nntp.enableDebug();
+			
+					nntp.connect();
+					nntp.setGroup(group);
 
-                    nntp.setGroup(group);
 					Long end = nntp.getGroupEnd();
+					if (verbose)
+						System.out.println("End Article: " + end);
 					
 					try {
 						nntp.disconnect();
@@ -46,16 +51,16 @@ public class NzbCollector  {
 							Long start = new Long(fileProperties.getProperty(group + ".currentArticle"));
 							
 							//NNTPMatchedArticle nntpma = new printArticle();
-                            NNTPMatchedArticle nntpma = new mysqlRSS();
+							    NNTPMatchedArticle nntpma = new mysqlRSS();
 
 
-                            if (args.length ==2 ) {
-								start = new Long(args[0]);
-								end = new Long(args[1]);
-								nntpma = new decodeArticle();
-							}
-							
-							// System.out.println("Group: " + group + " " + start +"-"+end);
+							if (ag.hasOption("s"))
+								start = new Long(ag.getOptionForKey("s"));
+							if (ag.hasOption("e"))
+								end = new Long(ag.getOptionForKey("e"));
+							//nntpma = new decodeArticle();
+							if (verbose)	
+							 System.out.println("Group: " + group + " " + start +"-"+end);
 							
 							Thread allThreads[];
 							
@@ -68,11 +73,14 @@ public class NzbCollector  {
 							for (int i=0; i<threads; i++) {
 								
 								NNTPConnection nntpthread = new NNTPConnection(host,port);
-								//nntpthread.enableDebug();
+								//if (verbose)
+								//	nntpthread.enableDebug();
 								// going to do this inside the collector thread
 								// nntpthread.connect();
 								// nntpthread.setGroup(group);
-								allThreads[i] = new Thread (new NzbCollectorThread(nntpma ,ac,nntpthread,group,".*\\.nzb.*"));
+								NzbCollectorThread nct = new NzbCollectorThread(nntpma ,ac,nntpthread,group,".*\\.nzb.*");
+								nct.setVerbose(verbose);
+								allThreads[i] = new Thread (nct);
 								allThreads[i].start();
 							}
 							
@@ -85,8 +93,8 @@ public class NzbCollector  {
 								}
 							}
 							long totaltime = (System.currentTimeMillis() - starttime) / 1000;
-							
-							// System.out.println(end-start + " articles in " + totaltime + " seconds (" + 1.0* (end-start)/totaltime + " a/s)");
+							if (verbose)	
+							 System.out.println(end-start + " articles in " + totaltime + " seconds (" + 1.0* (end-start)/totaltime + " a/s)");
 						} catch (NumberFormatException e) {
 							System.out.println("Could not read the properties file: " + e.getMessage());
 						}

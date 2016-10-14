@@ -87,7 +87,7 @@ public class NzbCollectorThread implements Runnable {
 					
 					
 				} catch (IOException e) {
-					System.out.println("Problem reading from NNTP server: " + e.getMessage());
+					System.out.println("Problem in thread reading from NNTP server: " + e.getMessage());
 				} catch (NNTPConnectionResponseException e) {
 					System.out.println("NNTP server didn't respond properly: " + e.getMessage());
 				} catch (NNTPNoSuchGroupException e) {

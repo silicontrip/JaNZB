@@ -22,6 +22,7 @@ public class mysqlRSS implements NNTPMatchedArticle {
     public  void processArticle (NNTPConnection n)  {
         
         
+	// System.out.println(">>> mysqlRSS processArticle");
         SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
         
         
@@ -66,8 +67,8 @@ public class mysqlRSS implements NNTPMatchedArticle {
             con.close();
             
         } catch (java.sql.SQLException sqe) {
-            
             System.out.println("SQL Error: " + sqe.getMessage());
+	    System.out.println("INSERT INTO NNTPArticle (message_id,creation_time,title,description) VALUES ('" + n.getArticleMessageID() + "','" + n.getArticleDate() + "','" +  n.getArticleSubject() + "','" + description + "')" ) ;
         } catch ( ClassNotFoundException cnfe) {
             System.out.println("Class not found: " + cnfe.getMessage());
             

@@ -60,7 +60,7 @@ public class janzb {
 					System.out.println ("FILE (" + f + "/" + nzb.getFilesLength() + ") "  + nzb.getFileSubject(f));
 					
 					new File(subDir).mkdir();
-					segments = nzb.getFileSegments(f);
+					segments = nzb.getFileSegment(f);
 					//	System.out.println ("Number of segments: " + nzb.getFileSegmentsLength(f) + " "  + nzb.getFileSubject(f));
 					
 					for (int n=0; n < segments.getLength(); n++) {

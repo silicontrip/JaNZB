@@ -17,6 +17,7 @@ public class NNTPConnection extends InputStream {
 	private boolean connected=false;
 	private static final byte[] dot = {0xd, 0xa, 0x2e, 0xd, 0xa};
 	private static final byte[] newline = {0xd, 0xa};
+	private boolean debug;
 	
 	private static final int BUFFER_SIZE=8192;
 	private  String endMarkerString;
@@ -86,12 +87,12 @@ public class NNTPConnection extends InputStream {
 	/** 
 	 * Enables printing of network messages
 	 */
-	public void enableDebug() { network.enableDebug(); }
+	public void enableDebug() { network.enableDebug(); debug = true; }
 	
 	/** 
 	 * Disables printing of network messages
 	 */
-	public void disableDebug() { network.disableDebug(); }
+	public void disableDebug() { network.disableDebug();  debug = false; }
 	
 	/** 
 	 * Returns the NNTP hostname
@@ -277,6 +278,7 @@ public class NNTPConnection extends InputStream {
 		String s = new String();
 
 		while (s.indexOf("\r\n") == -1 && i != -1) {
+			// set timeout
 			i = network.read();
 			if (i != -1) {
 				b[0] = (byte)i;
@@ -329,7 +331,8 @@ public class NNTPConnection extends InputStream {
 					buffer_pointer = 0;
 					
 					
-					//	printHex(buffer,buffer_size);
+					if (debug)
+						printHex(buffer,buffer_size);
 					
 				} else {
 					
@@ -352,7 +355,8 @@ public class NNTPConnection extends InputStream {
 				} else {
 					
 					buffer2_size=network.receiveResponse(buffer2,0,BUFFER_SIZE);
-					//printHex(buffer2,buffer2_size);
+					if (debug)
+					 	printHex(buffer2,buffer2_size);
 					
 					//  check that the end of data marker doesn't cross the boundary.
 					if (buffer2_size < endMarkerString.length()) {

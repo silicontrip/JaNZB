@@ -102,6 +102,9 @@ public class TCPConnection {
 	
 	public void connect() throws IOException {
 		network = new Socket(host,port);
+
+		network.setSoTimeout(30000); // set a 30 second timeout.  initially for testing
+		// will move to a configuration item if succesfull
 		
 		out =new BufferedOutputStream(network.getOutputStream());
 		in =new BufferedInputStream(network.getInputStream());
